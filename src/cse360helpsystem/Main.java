@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -15,7 +16,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	Stage window;
 	public Scene loginSc, studentSc, instructorSc, 
-				roleSc, adminSc;
+				roleSc, adminSc, setupSc, establishSc;
 	
 	@Override
 	public void start(Stage loginPage) throws Exception {
@@ -31,18 +32,16 @@ public class Main extends Application {
 		
 		// Text Fields
 		TextField userText = new TextField();
-		TextField passText = new TextField();
+		PasswordField passText = new PasswordField();
 		
 		// Buttons
 		Button login = new Button("Login");
 		login.setOnAction(e->{
-			System.out.println("login success");
+			System.out.println("Login Success");
 			window.setScene(roleWindow());
 		
 		});
 
-		
-		// Adding to VBox
 		grid.add(label,2,0,1,1);
 		grid.add(userName,1,1,1,1);
 		grid.add(userPass,1,2,1,1);
@@ -50,7 +49,6 @@ public class Main extends Application {
 		grid.add(passText,2,2,1,1);
 		grid.add(login, 2,3,1,1);
 
-		
 		loginSc = new Scene(grid, 640, 480);
 		loginPage.setScene(loginSc);
 		loginPage.show();
@@ -73,16 +71,23 @@ public class Main extends Application {
 		
 		
 		
-		sButton.setOnAction(e->{
+		// Button Actions for Menu
+		sButton.setOnAction(e->{ 
 			window.setScene(studentWindow());
+			System.out.println("Student View");
+			});
+		
+		aButton.setOnAction(e->{ 
+			window.setScene(adminWindow());
+			System.out.println("Admin View");
 		});
 		
-		aButton.setOnAction(e->{
-			window.setScene(adminWindow());
-		});
-		iButton.setOnAction(e->{
+		iButton.setOnAction(e->{ 
 			window.setScene(instructorWindow());
+			System.out.println("Instructor View");
 		});
+		
+		
 		
 		role.getItems().addAll(sButton, iButton, aButton);
 		StackPane sPane = new StackPane();
@@ -149,7 +154,7 @@ public class Main extends Application {
 	 * - Delete User Account
 	 * - List known Accounts
 	 * - Add or Remove Roles
-//	 * - Logout √ 
+	 * - Logout √ 
 	*/
 	public Scene adminWindow(){
 		Label label = new Label("Admin Page");
@@ -170,6 +175,73 @@ public class Main extends Application {
 		adminSc = new Scene(gPane, 640, 480);
 		return adminSc;
 	}
+	
+	
+	/* Establish Account Window
+	 * -----------------------------------
+	 * - Username 
+	 * - Password 
+	 * - Create
+	 * 
+	 * Needs Logic for database and textfield entries
+	 * */
+	public Scene establishWindow(){
+		Label label = new Label("Create Account");
+		Label userL = new Label("Username");
+		Label passL = new Label("Password");
+		Button create = new Button("Create");
+		TextField user = new TextField();
+		TextField pass = new TextField();
+		
+		
+		create.setAlignment(Pos.TOP_LEFT);
+		create.setOnAction(e->{
+			window.setScene(loginSc);
+		});
+		
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(label, 2,0,1,1);
+		gPane.add(user, 2,1,1,1);
+		gPane.add(pass, 2,2,1,1);
+		gPane.add(userL, 1,1,1,1);
+		gPane.add(passL, 1,2,1,1);
+		gPane.add(create,2,3,1,1);
+		
+		adminSc = new Scene(gPane, 640, 480);
+		return adminSc;
+	}
+	
+	
+	/* Finish Setting Up Account Window
+	 * ---------------------------------------
+	 * 
+	 * 
+	 * */
+	public Scene finishSetupWindow(){
+		Label label = new Label("Finish Setting Up Your Account");
+		Button logout = new Button("Logout");
+		
+		
+		logout.setAlignment(Pos.TOP_LEFT);
+		logout.setOnAction(e->{
+			window.setScene(loginSc);
+			System.out.println("Logout");
+		});
+		
+
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(label, 1,1,1,1);
+		gPane.add(logout,1,2,1,1);
+		
+		adminSc = new Scene(gPane, 640, 480);
+		return adminSc;
+	}
+	
+	
+	
 
 public static void main(String[] args) {
 		Application.launch(args);
