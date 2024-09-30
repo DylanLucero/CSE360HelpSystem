@@ -27,12 +27,12 @@ public class Main extends Application {
 		
 		// Labels
 		Label label = new Label("Login Page");
-		Label userName = new Label("Username: ");
-		Label userPass = new Label("Password: ");
 		
 		// Text Fields
 		TextField userText = new TextField();
+		userText.setPromptText("Username");
 		PasswordField passText = new PasswordField();
+		passText.setPromptText("Password");
 		
 		// Buttons
 		Button login = new Button("Login");
@@ -43,11 +43,9 @@ public class Main extends Application {
 		});
 
 		grid.add(label,2,0,1,1);
-		grid.add(userName,1,1,1,1);
-		grid.add(userPass,1,2,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
-		grid.add(login, 2,3,1,1);
+		grid.add(login, 2,4,4,5);
 
 		loginSc = new Scene(grid, 640, 480);
 		loginPage.setScene(loginSc);
@@ -187,11 +185,12 @@ public class Main extends Application {
 	 * */
 	public Scene establishWindow(){
 		Label label = new Label("Create Account");
-		Label userL = new Label("Username");
-		Label passL = new Label("Password");
 		Button create = new Button("Create");
+		
 		TextField user = new TextField();
+		user.setPromptText("Username");
 		TextField pass = new TextField();
+		pass.setPromptText("Password");
 		
 		
 		create.setAlignment(Pos.TOP_LEFT);
@@ -205,8 +204,6 @@ public class Main extends Application {
 		gPane.add(label, 2,0,1,1);
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
-		gPane.add(userL, 1,1,1,1);
-		gPane.add(passL, 1,2,1,1);
 		gPane.add(create,2,3,1,1);
 		
 		adminSc = new Scene(gPane, 640, 480);
