@@ -12,12 +12,11 @@ public class OTP{
 		int userOTP = rand.nextInt(100,9999);
 		if(userOTP<1000) {
 			stringOTP = "0" + userOTP;
-		}else {
+		} else {
 			stringOTP = Integer.toString(userOTP);
 		}
-	
 		return stringOTP;
-		}
+	}
 
 
 

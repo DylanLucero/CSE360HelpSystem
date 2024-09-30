@@ -12,10 +12,15 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import java.util.Random;
+import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main extends Application {
 	Stage window;
+	
+	private static final DatabaseHelper dbHelper = new DatabaseHelper();
+	private static final Scanner scnr = new Scanner(System.in);
+	
 	public Scene loginSc, studentSc, instructorSc, 
 				roleSc, adminSc, setupSc, establishSc;
 	
@@ -44,8 +49,8 @@ public class Main extends Application {
 		// Buttons
 		Button login = new Button("Login");
 		login.setOnAction(e->{
-			System.out.println("Login Success");
-			window.setScene(adminWindow());
+			//System.out.println("Login Success");
+			window.setScene(roleWindow());
 		
 		});
 		
@@ -90,17 +95,17 @@ public class Main extends Application {
 		// Button Actions for Menu
 		sButton.setOnAction(e->{ 
 			window.setScene(studentWindow());
-			System.out.println("Student View");
+			//System.out.println("Student View");
 			});
 		
 		aButton.setOnAction(e->{ 
 			window.setScene(adminWindow());
-			System.out.println("Admin View");
+			//System.out.println("Admin View");
 		});
 		
 		iButton.setOnAction(e->{ 
 			window.setScene(instructorWindow());
-			System.out.println("Instructor View");
+			//System.out.println("Instructor View");
 		});
 		
 		// Adding to Grid
@@ -159,8 +164,6 @@ public class Main extends Application {
 		Label label = new Label("Instructor Page");
 		Button logout = new Button("Logout");
 		
-		
-		logout.setAlignment(Pos.TOP_LEFT);
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -194,7 +197,6 @@ public class Main extends Application {
 	 * - Logout √ 
 	*/
 	public Scene adminWindow(){
-		Random rand = new Random();
 		Label label = new Label("Admin Page");
 		TextField otp = new TextField();
 		Button inviteUser = new Button("Invite User");
@@ -206,7 +208,6 @@ public class Main extends Application {
 		
 		// Button Functions
 		//Logout
-		logout.setAlignment(Pos.TOP_LEFT);
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -267,14 +268,12 @@ public class Main extends Application {
 	public Scene establishWindow(){
 		Label label = new Label("Create Account");
 		Button create = new Button("Create");
-		
 		TextField user = new TextField();
 		user.setPromptText("Username");
 		TextField pass = new TextField();
 		pass.setPromptText("Password");
 		
 		
-		create.setAlignment(Pos.TOP_LEFT);
 		create.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -325,13 +324,10 @@ public class Main extends Application {
 		 * Add routing to users correct window
 		 * If more than one role redirect to roleWindow()
 		 * */
-		advance.setAlignment(Pos.TOP_LEFT);
 		advance.setOnAction(e->{
 			window.setScene(loginSc);
 			System.out.println("Logout");
 		});
-
-		
 		
 		
 		GridPane gPane = new GridPane();
