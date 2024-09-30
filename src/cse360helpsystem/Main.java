@@ -32,6 +32,8 @@ public class Main extends Application {
 		
 		// Adding to VBox
 		grid.add(label,2,0,1,1);
+		grid.add(userName,1,1,1,1);
+		grid.add(userPass,1,2,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
 		grid.add(login, 2,3,1,1);
