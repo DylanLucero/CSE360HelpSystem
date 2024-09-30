@@ -25,7 +25,9 @@ public class Main extends Application {
 	@Override
 	public void start(Stage loginPage) throws Exception {
 		window = loginPage;
+		
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+		
 		loginPage.setTitle("CSE360 Help System");
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
@@ -126,7 +128,6 @@ public class Main extends Application {
 		Button logout = new Button("Logout");
 		
 		
-		logout.setAlignment(Pos.TOP_LEFT);
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -185,8 +186,8 @@ public class Main extends Application {
 	/* Admin Window 
 	 * --------------------------------------
 	 * Phase 1 requires
-	 * - Invite to join, generate an OTP
-	 * - Reset User Account
+	 * - Invite to join, generate an OTP - Need database Verification
+	 * - Reset User Account - Need databse Verification
 	 * - Delete User Account
 	 * - List known Accounts
 	 * - Add or Remove Roles
@@ -210,18 +211,19 @@ public class Main extends Application {
 			window.setScene(loginSc);
 		});
 		
+		
 		// Invite User - Generating an OTP to verify in database
 		inviteUser.setOnAction(e->{
-			int userOTP = rand.nextInt(9999);
-			otp.setText(String.valueOf(userOTP));
-			
+			otp.setText(OTP.generateOTP());
 		});
+		
 		
 		// Reset User - Generating an OTP for user to login with
 		resetUser.setOnAction(e->{
-			int userOTP = rand.nextInt(9999);
-			otp.setText(String.valueOf(userOTP));
+			otp.setText(OTP.generateOTP());
 		});
+		
+		
 		// Delete User - Delete User account from Database
 		// List Users - List user accounts from Database
 		// Add or Remove Roles - Add or remove roles from user accounts
