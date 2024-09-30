@@ -1,6 +1,7 @@
 package cse360helpsystem;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -10,17 +11,21 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import java.util.Random;
 
 public class Main extends Application {
 	Stage window;
 	public Scene loginSc, studentSc, instructorSc, 
 				roleSc, adminSc, setupSc, establishSc;
 	
+	
+	
+	// Login Page
 	@Override
 	public void start(Stage loginPage) throws Exception {
 		window = loginPage;
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		loginPage.setTitle("CSE360 Help System");
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
@@ -38,14 +43,25 @@ public class Main extends Application {
 		Button login = new Button("Login");
 		login.setOnAction(e->{
 			System.out.println("Login Success");
-			window.setScene(roleWindow());
+			window.setScene(adminWindow());
 		
 		});
-
+		
+		// Fix for AutoFocus
+		userText.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	grid.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		// Adding to Grid
 		grid.add(label,2,0,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
 		grid.add(login, 2,4,4,5);
+		grid.setVgap(10);
+
 
 		loginSc = new Scene(grid, 640, 480);
 		loginPage.setScene(loginSc);
@@ -85,15 +101,20 @@ public class Main extends Application {
 			System.out.println("Instructor View");
 		});
 		
-		
+		// Adding to Grid
 		role.getItems().addAll(sButton, iButton, aButton);
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
 		gPane.add(role, 3,2,1,1);
 		gPane.add(title,3,1,1,1);
+		gPane.setVgap(10);
+		
 		studentSc = new Scene(gPane, 640, 480);
 		return studentSc;
 	}
+	
+	
+	
 
 	/* Student Window
 	 * ----------------------------------------
@@ -113,11 +134,19 @@ public class Main extends Application {
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
-		gPane.add(label, 1,1,1,1);
+		
+		// Adding to Grid
+		gPane.add(label, 1,0,1,1);
 		gPane.add(logout,1,2,1,1);
+		gPane.setVgap(10);
+		
 		studentSc = new Scene(gPane, 640, 480);
 		return studentSc;
 	}
+	
+	
+	
+	
 	
 	
 	/* Instructor Window
@@ -138,11 +167,19 @@ public class Main extends Application {
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
+		
+		// Adding to Grid
 		gPane.add(label, 1,1,1,1);
 		gPane.add(logout,1,2,1,1);
+		gPane.setVgap(10);
+
 		instructorSc = new Scene(gPane, 640, 480);
 		return instructorSc;
 	}
+	
+	
+	
+	
 	
 	
 	/* Admin Window 
@@ -156,24 +193,65 @@ public class Main extends Application {
 	 * - Logout √ 
 	*/
 	public Scene adminWindow(){
+		Random rand = new Random();
 		Label label = new Label("Admin Page");
+		TextField otp = new TextField();
+		Button inviteUser = new Button("Invite User");
+		Button resetUser = new Button("Reset User Account");
+		Button deleteUser = new Button("Delete User Account");
+		Button listUsers = new Button("List Known Users");
+		Button addRemoveRoles = new Button("Add/Remove Roles"); // Thinking a checkbox system of some sort
 		Button logout = new Button("Logout");
 		
-		
+		// Button Functions
+		//Logout
 		logout.setAlignment(Pos.TOP_LEFT);
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
 		
+		// Invite User - Generating an OTP to verify in database
+		inviteUser.setOnAction(e->{
+			int userOTP = rand.nextInt(9999);
+			otp.setText(String.valueOf(userOTP));
+			
+		});
 		
+		// Reset User - Generating an OTP for user to login with
+		resetUser.setOnAction(e->{
+			int userOTP = rand.nextInt(9999);
+			otp.setText(String.valueOf(userOTP));
+		});
+		// Delete User - Delete User account from Database
+		// List Users - List user accounts from Database
+		// Add or Remove Roles - Add or remove roles from user accounts
+		
+		
+		
+		// Pane Mumbo Jumbo
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
-		gPane.add(label, 1,1,1,1);
-		gPane.add(logout,1,2,1,1);
+		
+		
+		// Adding to Grid
+		gPane.add(label, 1,0,2,1);
+		gPane.add(inviteUser,1,2,1,1);
+		gPane.add(otp,3,2,2,1);
+		gPane.add(resetUser,1,3,2,1);
+		gPane.add(deleteUser,1,4,2,1);
+		gPane.add(listUsers,1,5,2,1);
+		gPane.add(addRemoveRoles,1,6,2,1);
+		gPane.add(logout,1,7,2,1);
+		gPane.setVgap(10);
+
 		
 		adminSc = new Scene(gPane, 640, 480);
 		return adminSc;
 	}
+	
+	
+	
+	
 	
 	
 	/* Establish Account Window
@@ -199,17 +277,25 @@ public class Main extends Application {
 			window.setScene(loginSc);
 		});
 		
-		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
+		
+		
+		// Adding to Grid
 		gPane.add(label, 2,0,1,1);
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
 		gPane.add(create,2,3,1,1);
+		gPane.setVgap(10);
+
 		
 		adminSc = new Scene(gPane, 640, 480);
 		return adminSc;
 	}
+	
+	
+	
+	
 	
 	
 	/* Finish Setting Up Account Window
@@ -218,21 +304,55 @@ public class Main extends Application {
 	 * 
 	 * */
 	public Scene finishSetupWindow(){
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
-		Button logout = new Button("Logout");
+		Button advance = new Button("Continue");
+		TextField firstName = new TextField();
+		firstName.setPromptText("First Name");
+		TextField middleName = new TextField();
+		middleName.setPromptText("Middle Name");
+		TextField lastName = new TextField();
+		lastName.setPromptText("Last Name");
+		TextField prefName = new TextField();
+		prefName.setPromptText("Prefered Name");
 		
+
 		
-		logout.setAlignment(Pos.TOP_LEFT);
-		logout.setOnAction(e->{
+		/* Continue Button 
+		 * ------------------------
+		 * Add routing to users correct window
+		 * If more than one role redirect to roleWindow()
+		 * */
+		advance.setAlignment(Pos.TOP_LEFT);
+		advance.setOnAction(e->{
 			window.setScene(loginSc);
 			System.out.println("Logout");
 		});
-		
 
+		
+		
+		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
+		
+		//Fix for AutoFocus
+		firstName.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		
+		// Adding to Grid
 		gPane.add(label, 1,1,1,1);
-		gPane.add(logout,1,2,1,1);
+		gPane.add(firstName,1,2,1,1);
+		gPane.add(middleName,1,3,1,1);
+		gPane.add(lastName, 1,4,1,1);
+		gPane.add(prefName,1,5,1,1);
+		gPane.add(advance,1,6,1,1);
+		gPane.setVgap(10);
+
 		
 		adminSc = new Scene(gPane, 640, 480);
 		return adminSc;
