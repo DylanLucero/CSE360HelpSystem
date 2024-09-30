@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -12,17 +14,18 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main extends Application {
 	Stage window;
-	
-	private static final DatabaseHelper dbHelper = new DatabaseHelper();
+
 	private static final Scanner scnr = new Scanner(System.in);
 	
-	public Scene loginSc, studentSc, instructorSc, 
-				roleSc, adminSc, setupSc, establishSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc;
+	public 	Alert a = new Alert(AlertType.NONE);
+
 	
 	
 	
@@ -30,7 +33,6 @@ public class Main extends Application {
 	@Override
 	public void start(Stage loginPage) throws Exception {
 		window = loginPage;
-		
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		
 		loginPage.setTitle("CSE360 Help System");
@@ -48,7 +50,25 @@ public class Main extends Application {
 		
 		// Buttons
 		Button login = new Button("Login");
+		
+		//Alerts
 		login.setOnAction(e->{
+			if(userText.getText() == "" || passText.getText() == "") {
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Fields left empty.");
+				a.show();
+				userText.clear();
+				passText.clear();
+				return;
+			}
+			
+			
+			System.out.println("Username: " + userText.getText());
+			System.out.println("Password: " + passText.getText());
+			
+	
+			userText.clear();
+			passText.clear();
 			//System.out.println("Login Success");
 			window.setScene(roleWindow());
 		
@@ -68,8 +88,7 @@ public class Main extends Application {
 		grid.add(passText,2,2,1,1);
 		grid.add(login, 2,4,4,5);
 		grid.setVgap(10);
-
-
+		
 		loginSc = new Scene(grid, 640, 480);
 		loginPage.setScene(loginSc);
 		loginPage.show();
@@ -89,8 +108,6 @@ public class Main extends Application {
 		MenuItem sButton = new MenuItem("Student");
 		MenuItem iButton = new MenuItem("Instructor");
 		MenuItem aButton = new MenuItem("Admin");
-		
-		
 		
 		// Button Actions for Menu
 		sButton.setOnAction(e->{ 
@@ -123,7 +140,7 @@ public class Main extends Application {
 	
 	
 
-	/* Student Window
+	/* Student Window √
 	 * ----------------------------------------
 	 * Phase 1 requires 
 	 * - A logout button √
@@ -131,12 +148,10 @@ public class Main extends Application {
 	public Scene studentWindow(){
 		Label label = new Label("Student Page");
 		Button logout = new Button("Logout");
-		
-		
+				
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
-		
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -153,9 +168,7 @@ public class Main extends Application {
 	
 	
 	
-	
-	
-	/* Instructor Window
+	/* Instructor Window √
 	 * --------------------------------------
 	 * Phase 1 requires
 	 * - A logout button √
@@ -167,7 +180,6 @@ public class Main extends Application {
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
-		
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -226,15 +238,16 @@ public class Main extends Application {
 		
 		
 		// Delete User - Delete User account from Database
+		deleteUser.setOnAction(e->{
+			System.out.println("User Deleted");
+		});
+		
 		// List Users - List user accounts from Database
 		// Add or Remove Roles - Add or remove roles from user accounts
-		
-		
 		
 		// Pane Mumbo Jumbo
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
-		
 		
 		// Adding to Grid
 		gPane.add(label, 1,0,2,1);
@@ -247,12 +260,9 @@ public class Main extends Application {
 		gPane.add(logout,1,7,2,1);
 		gPane.setVgap(10);
 
-		
 		adminSc = new Scene(gPane, 640, 480);
 		return adminSc;
 	}
-	
-	
 	
 	
 	
@@ -290,14 +300,12 @@ public class Main extends Application {
 		gPane.setVgap(10);
 
 		
-		adminSc = new Scene(gPane, 640, 480);
-		return adminSc;
+		establishSc = new Scene(gPane, 640, 480);
+		return establishSc;
 	}
 	
 	
-	
-	
-	
+
 	
 	/* Finish Setting Up Account Window
 	 * ---------------------------------------
@@ -316,19 +324,33 @@ public class Main extends Application {
 		lastName.setPromptText("Last Name");
 		TextField prefName = new TextField();
 		prefName.setPromptText("Prefered Name");
-		
-
-		
 		/* Continue Button 
 		 * ------------------------
 		 * Add routing to users correct window
 		 * If more than one role redirect to roleWindow()
 		 * */
 		advance.setOnAction(e->{
-			window.setScene(loginSc);
-			System.out.println("Logout");
+			
+			if(firstName.getText()=="" || lastName.getText()=="" || prefName.getText()=="") {
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Fields left empty.");
+				a.show();
+				return;
+			}
+			
+			System.out.println("First Name: " + firstName.getText());
+			System.out.println("Middle Name: " + middleName.getText());
+			System.out.println("Last Name: "+ lastName.getText());
+			System.out.println("Prefered Name: " + prefName.getText());
+
+			// If role = student, redirect to student
+			// If role = admin, redirect to admin
+			// If role = instructor, redirect to instructor
+			// If multiple roles, redirect to role selection
+			
+			window.setScene(roleWindow());
+			//System.out.println("Logout");
 		});
-		
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -341,7 +363,6 @@ public class Main extends Application {
             }
         });
 		
-		
 		// Adding to Grid
 		gPane.add(label, 1,1,1,1);
 		gPane.add(firstName,1,2,1,1);
@@ -350,16 +371,15 @@ public class Main extends Application {
 		gPane.add(prefName,1,5,1,1);
 		gPane.add(advance,1,6,1,1);
 		gPane.setVgap(10);
-
 		
-		adminSc = new Scene(gPane, 640, 480);
-		return adminSc;
+		setupSc = new Scene(gPane, 640, 480);
+		return setupSc;
 	}
-	
 	
 	
 
 public static void main(String[] args) {
-		Application.launch(args);
+	Application.launch(args);
+
 	}
 }

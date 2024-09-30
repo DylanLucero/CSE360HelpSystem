@@ -35,9 +35,9 @@ public class DatabaseHelper {
 		
 		// Table creation
 		private void createTables() throws SQLException {
-			String userTable = "CREATE TABLE IF NOT EXISTS userAccounts ("
+			String userTable = "CREATE TABLE IF NOT EXISTS users ("
 					+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-					+ "email VARCHAR(255) UNIQUE, "
+					+ "usern VARCHAR(255) UNIQUE, "
 					+ "password VARCHAR(255), "
 					+ "role VARCHAR(20))";
 			statement.execute(userTable);
@@ -46,7 +46,7 @@ public class DatabaseHelper {
 
 		// Check if the database is empty
 		public boolean isDatabaseEmpty() throws SQLException {
-			String query = "SELECT COUNT(*) AS count FROM cse360users";
+			String query = "SELECT COUNT(*) AS count FROM users";
 			ResultSet resultSet = statement.executeQuery(query);
 			if (resultSet.next()) {
 				return resultSet.getInt("count") == 0;
@@ -57,12 +57,12 @@ public class DatabaseHelper {
 		
 		
 		// Register Account to Database
-		public void register(String email, String password, String role) throws SQLException {
-			String insertUser = "INSERT INTO cse360users (email, password, role) VALUES (?, ?, ?)";
+		public void register(String username, String password) throws SQLException {
+			String insertUser = "INSERT INTO users (email, password, role) VALUES (?, ?, ?)";
 			try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
-				pstmt.setString(1, email);
+				pstmt.setString(1, username);
 				pstmt.setString(2, password);
-				pstmt.setString(3, role);
+
 				pstmt.executeUpdate();
 			}
 		}
@@ -71,7 +71,7 @@ public class DatabaseHelper {
 		
 		// Login to Account
 		public boolean login(String email, String password, String role) throws SQLException {
-			String query = "SELECT * FROM cse360users WHERE email = ? AND password = ? AND role = ?";
+			String query = "SELECT * FROM users WHERE email = ? AND password = ? AND role = ?";
 			try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 				pstmt.setString(1, email);
 				pstmt.setString(2, password);
@@ -86,7 +86,7 @@ public class DatabaseHelper {
 		
 		// Verifying if Account Exists
 		public boolean doesUserExist(String email) {
-		    String query = "SELECT COUNT(*) FROM cse360users WHERE email = ?";
+		    String query = "SELECT COUNT(*) FROM users WHERE email = ?";
 		    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 		        
 		        pstmt.setString(1, email);
@@ -105,7 +105,7 @@ public class DatabaseHelper {
 		
 		// List Users in Database
 		public void displayUsersByAdmin() throws SQLException{
-			String sql = "SELECT * FROM cse360users"; 
+			String sql = "SELECT * FROM users"; 
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(sql); 
 
@@ -129,7 +129,7 @@ public class DatabaseHelper {
 		 * 
 		 * 
 		public void displayUsersByUser() throws SQLException{
-			String sql = "SELECT * FROM cse360users"; 
+			String sql = "SELECT * FROM users"; 
 			Statement stmt = connection.createStatement();
 			ResultSet rs = stmt.executeQuery(sql); 
 
