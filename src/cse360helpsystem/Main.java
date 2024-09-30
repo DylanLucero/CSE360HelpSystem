@@ -86,11 +86,12 @@ public class Main extends Application {
 		});
 		
 		
-		
 		role.getItems().addAll(sButton, iButton, aButton);
-		StackPane sPane = new StackPane();
-		sPane.getChildren().add(role);
-		studentSc = new Scene(sPane, 640, 480);
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(role, 3,2,1,1);
+		gPane.add(title,3,1,1,1);
+		studentSc = new Scene(gPane, 640, 480);
 		return studentSc;
 	}
 
