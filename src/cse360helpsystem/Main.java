@@ -51,6 +51,7 @@ public class Main extends Application {
 		
 		// Buttons
 		Button login = new Button("Login");
+		Button register = new Button("Register");
 		
 		//Alerts
 		login.setOnAction(e->{
@@ -71,8 +72,14 @@ public class Main extends Application {
 			userText.clear();
 			passText.clear();
 			//System.out.println("Login Success");
-			window.setScene(roleWindow());
+			window.setScene(finishSetupWindow());
 		
+		});
+		
+		register.setOnAction(e->{
+			userText.clear();
+			passText.clear();
+			window.setScene(establishWindow());
 		});
 		
 		// Fix for AutoFocus
@@ -87,6 +94,7 @@ public class Main extends Application {
 		grid.add(label,2,0,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
+		grid.add(register,3,4,4,5);
 		grid.add(login, 2,4,4,5);
 		grid.setVgap(10);
 		
@@ -317,6 +325,8 @@ public class Main extends Application {
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
 		Button advance = new Button("Continue");
+		TextField email = new TextField();
+		email.setPromptText("Email Address");
 		TextField firstName = new TextField();
 		firstName.setPromptText("First Name");
 		TextField middleName = new TextField();
