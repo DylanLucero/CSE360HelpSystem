@@ -289,24 +289,40 @@ public class Main extends Application {
 		Button create = new Button("Create");
 		TextField user = new TextField();
 		user.setPromptText("Username");
-		TextField pass = new TextField();
+		PasswordField pass = new PasswordField();
 		pass.setPromptText("Password");
+		PasswordField verifyPass = new PasswordField();
+		verifyPass.setPromptText("Re-enter Password");
+
 		
 		
 		create.setOnAction(e->{
+			if(pass.getText() != verifyPass.getText()) {
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Passwords do Not match");
+				a.show();
+				user.clear();
+				pass.clear();
+				verifyPass.clear();
+				return;
+			}
 			window.setScene(loginSc);
 		});
+		
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
 		
+
 		
 		// Adding to Grid
 		gPane.add(label, 2,0,1,1);
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
-		gPane.add(create,2,3,1,1);
+		gPane.add(verifyPass, 2,3,1,1);
+		gPane.add(create,2,4,1,1);
 		gPane.setVgap(10);
+		
 
 		
 		establishSc = new Scene(gPane, 640, 480);
