@@ -1,51 +1,55 @@
 package cse360helpsystem;
+import java.sql.*;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-public class DatabaseHelper {
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/cse360helpsystem";  // Update to your DB URL
-    private static final String DB_USER = "sa";  // Update to your DB username
-    private static final String DB_PASSWORD = "";  // Update to your DB password
+class DatabaseHelper {
 
-    // Establish a database connection
-    public Connection connect() throws SQLException {
-        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-    }
+	// JDBC driver name and database URL 
+	static final String JDBC_DRIVER = "org.h2.Driver";   
+	static final String DB_URL = "jdbc:h2:~/firstDatabase";  
 
-    // Insert new user into the database
-    public boolean insertUser(String username, String password, String role) throws SQLException {
-        String query = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-        
-        try (Connection conn = connect();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.setString(3, role);
-            int rowsInserted = stmt.executeUpdate();
-            return rowsInserted > 0;
-        }
-    }
+	//  Database credentials 
+	static final String USER = "sa"; 
+	static final String PASS = ""; 
 
-    // Check if user exists and password matches
-    public String authenticateUser(String username, String password) throws SQLException {
-        String query = "SELECT role FROM users WHERE username = ? AND password = ?";
-        
-        try (Connection conn = connect();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet resultSet = stmt.executeQuery();
-            
-            if (resultSet.next()) {
-                return resultSet.getString("role");  // Return role if found
-            } else {
-                return null;  // No matching user found
-            }
-        }
-    }
+	private Connection connection = null;
+	private Statement statement = null; 
+	//	PreparedStatement pstmt
+
+	public void connectToDatabase() throws SQLException {
+		try {
+			Class.forName(JDBC_DRIVER); // Load the JDBC driver
+			System.out.println("Connecting to database...");
+			connection = DriverManager.getConnection(DB_URL, USER, PASS);
+			statement = connection.createStatement(); 
+			createTables();  // Create the necessary tables if they don't exist
+		} catch (ClassNotFoundException e) {
+			System.err.println("JDBC Driver not found: " + e.getMessage());
+		}
+	}
+
+	private void createTables() throws SQLException {
+		String userTable = "CREATE TABLE IF NOT EXISTS cse360users ("
+				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+				+ "email VARCHAR(255) UNIQUE, "
+				+ "password VARCHAR(255), "
+				+ "role VARCHAR(20))";
+		statement.execute(userTable);
+	}
+
+
+	// Check if the database is empty
+	public boolean isDatabaseEmpty() throws SQLException {
+		String query = "SELECT COUNT(*) AS count FROM cse360users";
+		ResultSet resultSet = statement.executeQuery(query);
+		if (resultSet.next()) {
+			return resultSet.getInt("count") == 0;
+		}
+		return true;
+	}
 }
