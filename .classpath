@@ -7,6 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX21"/>
-	<classpathentry kind="lib" path="/Users/messiah/eclipse-workspace/CSE360HelpSystem/h2/bin/h2-2.3.232.jar"/>
+	<classpathentry kind="lib" path="C:/Users/imran/OneDrive/Documents/GitHub/CSE360HelpSystem/h2/bin/h2-2.3.232.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

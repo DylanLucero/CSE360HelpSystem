@@ -297,7 +297,7 @@ public class Main extends Application {
 		
 		
 		create.setOnAction(e->{
-			if(pass.getText() != verifyPass.getText()) {
+			if(!pass.getText().equals(verifyPass.getText())) {
 				a.setAlertType(AlertType.WARNING);
 				a.setContentText("Passwords do Not match");
 				a.show();
