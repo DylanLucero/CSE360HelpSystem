@@ -15,14 +15,15 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
 import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main extends Application {
 	Stage window;
+	
 
-	private static final Scanner scnr = new Scanner(System.in);
+	private static final DatabaseHelper databaseHelper = new DatabaseHelper();
+	private static final Scanner scan = new Scanner(System.in);
 	
 	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc;
 	public 	Alert a = new Alert(AlertType.NONE);
@@ -35,6 +36,10 @@ public class Main extends Application {
 	public void start(Stage loginPage) throws Exception {
 		window = loginPage;
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+		
+		// Needs if-else that checks if database is empty. If database is empty, we create an admin else we go to the normal login page.
+			
+			databaseHelper.connectToDatabase();  // Connect to the database
 		
 		loginPage.setTitle("CSE360 Help System");
 		GridPane grid = new GridPane();
@@ -55,7 +60,7 @@ public class Main extends Application {
 		
 		//Alerts
 		login.setOnAction(e->{
-			if(userText.getText() == "" || passText.getText() == "") {
+			if(userText.getText().equals("") || passText.getText().equals("")) {
 				a.setAlertType(AlertType.WARNING);
 				a.setContentText("Fields left empty.");
 				a.show();
@@ -102,8 +107,8 @@ public class Main extends Application {
 		loginPage.setScene(loginSc);
 		loginPage.show();
 	}
-	
-	
+
+
 	/* Role Selection Window 
 	 * ---------------------------------------------
 	 * This needs to trigger ONLY if the account has
@@ -285,6 +290,7 @@ public class Main extends Application {
 	 * Needs Logic for database and textfield entries
 	 * */
 	public Scene establishWindow(){
+		System.out.println("Setting up the account.");
 		Label label = new Label("Create Account");
 		Button create = new Button("Create");
 		TextField user = new TextField();
@@ -305,6 +311,17 @@ public class Main extends Application {
 				pass.clear();
 				verifyPass.clear();
 				return;
+			}
+			else {
+				 String username = user.getText();      // Get the username when button is clicked
+			        String password = pass.getText();      // Get the password when button is clicked
+			        try {
+						databaseHelper.register(username, password);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
 			}
 			window.setScene(loginSc);
 		});
@@ -407,6 +424,10 @@ public class Main extends Application {
 
 public static void main(String[] args) {
 	Application.launch(args);
+	
 
 	}
+private static void adminFlow() throws SQLException {
+
+}
 }
