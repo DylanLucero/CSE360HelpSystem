@@ -110,8 +110,6 @@ public class Main extends Application {
 	
 			userText.clear();
 			passText.clear();
-			//System.out.println("Login Success");
-			window.setScene(finishSetupWindow());
 		
 		});
 		
