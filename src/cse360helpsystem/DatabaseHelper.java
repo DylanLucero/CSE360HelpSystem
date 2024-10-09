@@ -47,17 +47,27 @@ class DatabaseHelper {
 		}
 		return true;
 	}
-	public void register(String username, String pass) throws SQLException {
+	public void register(String username, String pass, String role) throws SQLException {
+		String insertUser = "INSERT INTO cse360users (username, password, role) VALUES (?, ?, ?)";
+		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
+			pstmt.setString(1, username);
+			pstmt.setString(2, pass);
+			pstmt.setString(3, role);
+			pstmt.executeUpdate();
+		}
+	}
+	public void adminRegister(String username, String pass, String role) throws SQLException {
 		String insertUser = "INSERT INTO cse360users (username, password) VALUES (?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, pass);
+			pstmt.setString(3, role);
 			pstmt.executeUpdate();
 		}
 	}
 
 	public boolean login(String username, String password, String role) throws SQLException {
-		String query = "SELECT * FROM cse360users WHERE email = ? AND password = ? AND role = ?";
+		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, password);
@@ -68,11 +78,11 @@ class DatabaseHelper {
 		}
 	}
 	
-	public boolean doesUserExist(String email) {
-	    String query = "SELECT COUNT(*) FROM cse360users WHERE email = ?";
+	public boolean doesUserExist(String username) {
+	    String query = "SELECT COUNT(*) FROM cse360users WHERE username = ?";
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 	        
-	        pstmt.setString(1, email);
+	        pstmt.setString(1, username);
 	        ResultSet rs = pstmt.executeQuery();
 	        
 	        if (rs.next()) {

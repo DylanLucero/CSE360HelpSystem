@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -53,6 +54,9 @@ public class Main extends Application {
 		userText.setPromptText("Username");
 		PasswordField passText = new PasswordField();
 		passText.setPromptText("Password");
+		ComboBox<String> roleBox = new ComboBox<>();
+		roleBox.getItems().addAll("Admin", "Student", "Instructor");
+		roleBox.setPromptText("Choose what you want to login as");
 		
 		// Buttons
 		Button login = new Button("Login");
@@ -67,7 +71,26 @@ public class Main extends Application {
 				userText.clear();
 				passText.clear();
 				return;
-			}
+		    }
+
+		    try {
+		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), roleBox.getValue()); // Replace "role" with the actual role you want to check
+		        if (loginSuccess) {
+		            System.out.println("Login Success");
+		            window.setScene(finishSetupWindow());
+		        } else {
+		            a.setAlertType(AlertType.ERROR);
+		            a.setContentText("Invalid username or password.");
+		            a.show();
+		        }
+		    } catch (SQLException ex) {
+		        ex.printStackTrace();
+		        a.setAlertType(AlertType.ERROR);
+		        a.setContentText("Database error occurred.");
+		        a.show();
+		    }
+		    
+		    
 			
 			
 			System.out.println("Username: " + userText.getText());
@@ -99,6 +122,7 @@ public class Main extends Application {
 		grid.add(label,2,0,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
+		grid.add(roleBox, 2, 3, 1, 1);
 		grid.add(register,3,4,4,5);
 		grid.add(login, 2,4,4,5);
 		grid.setVgap(10);
@@ -290,15 +314,20 @@ public class Main extends Application {
 	 * Needs Logic for database and textfield entries
 	 * */
 	public Scene establishWindow(){
-		System.out.println("Setting up the account.");
 		Label label = new Label("Create Account");
 		Button create = new Button("Create");
+		Button backButton = new Button("Back");
+		backButton.setOnAction(e -> window.setScene(loginSc));
 		TextField user = new TextField();
 		user.setPromptText("Username");
 		PasswordField pass = new PasswordField();
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
+		ComboBox<String> roleBox = new ComboBox<>();
+		roleBox.getItems().addAll("Admin", "Student", "Instructor");
+		roleBox.setPromptText("Choose your role");
+
 
 		
 		
@@ -312,11 +341,21 @@ public class Main extends Application {
 				verifyPass.clear();
 				return;
 			}
+			if (databaseHelper.doesUserExist(user.getText())) {
+			    a.setAlertType(AlertType.WARNING);
+			    a.setContentText("User already exists!");
+			    a.show();
+			    user.clear();
+			    pass.clear();
+			    verifyPass.clear();
+			    return;
+			}
 			else {
 				 String username = user.getText();      // Get the username when button is clicked
 			        String password = pass.getText();      // Get the password when button is clicked
+			        	String role = roleBox.getValue();	// Gets the role when create is clicked
 			        try {
-						databaseHelper.register(username, password);
+						databaseHelper.register(username, password, role);
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -337,7 +376,9 @@ public class Main extends Application {
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
 		gPane.add(verifyPass, 2,3,1,1);
-		gPane.add(create,2,4,1,1);
+		gPane.add(roleBox, 2,4,1,1);
+		gPane.add(create,2,5,1,1);
+		gPane.add(backButton,3,5,1,1);
 		gPane.setVgap(10);
 		
 
