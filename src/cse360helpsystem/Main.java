@@ -74,14 +74,25 @@ public class Main extends Application {
 		    }
 
 		    try {
-		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), roleBox.getValue()); // Replace "role" with the actual role you want to check
-		        if (loginSuccess) {
-		            System.out.println("Login Success");
+		        boolean loginSuccessStudent = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
+		        boolean loginSuccessAdmin = databaseHelper.login(userText.getText(), passText.getText(), "Admin");
+		        boolean loginSuccessInstructor = databaseHelper.login(userText.getText(), passText.getText(), "Instructor");
+		        if (loginSuccessStudent) {
+		            System.out.println("Login Success Student");
 		            window.setScene(finishSetupWindow());
-		        } else {
-		            a.setAlertType(AlertType.ERROR);
-		            a.setContentText("Invalid username or password.");
-		            a.show();
+		        } else
+		        if (loginSuccessAdmin){
+		        	System.out.println("Login Success Admin");
+		            window.setScene(finishSetupWindow());
+		        } else
+		        if (loginSuccessInstructor){
+		        	System.out.println("Login Success Instructor");
+		            window.setScene(finishSetupWindow());
+		        }
+		        else {
+			        a.setAlertType(AlertType.ERROR);
+			        a.setContentText("Login error try again.");
+			        a.show();
 		        }
 		    } catch (SQLException ex) {
 		        ex.printStackTrace();

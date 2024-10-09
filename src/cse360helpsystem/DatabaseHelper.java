@@ -57,7 +57,7 @@ class DatabaseHelper {
 		}
 	}
 	public void adminRegister(String username, String pass, String role) throws SQLException {
-		String insertUser = "INSERT INTO cse360users (username, password) VALUES (?, ?)";
+		String insertUser = "INSERT INTO cse360users (username, password, role) VALUES (?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertUser)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, pass);
