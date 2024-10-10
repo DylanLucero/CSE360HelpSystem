@@ -61,8 +61,6 @@ public class Main extends Application {
 		PasswordField passText = new PasswordField();
 		passText.setPromptText("Password");
 		ComboBox<String> roleBox = new ComboBox<>();
-		roleBox.getItems().addAll("Admin", "Student", "Instructor");
-		roleBox.setPromptText("Choose what you want to login as");
 		
 		// Buttons
 		Button login = new Button("Login");
@@ -80,17 +78,18 @@ public class Main extends Application {
 		    }
 
 		    try {
-		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText()); // Replace "role" with the actual role you want to check
+		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
 		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
-		        if (loginSuccess) {
-		            System.out.println("Login Success Student/Instructor");
-		            if (!databaseHelper.setupComplete(userText.getText())) {
-		                System.out.println("Account setup incomplete, moving to setup page.");
-		            window.setScene(finishSetupWindow(userText.getText()));
-		        } else
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
-		            window.setScene(finishSetupWindow(userText.getText()));
+		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+		        } else {
+		        if (loginSuccess) {
+		            System.out.println("Login Success Student/Instructor");
+		        }
+		            if (!databaseHelper.setupComplete(userText.getText())) {
+		                System.out.println("Account setup incomplete, moving to setup page.");
+		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 		        } else
 		        {
 			        a.setAlertType(AlertType.ERROR);
@@ -135,7 +134,6 @@ public class Main extends Application {
 		grid.add(label,2,0,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
-		grid.add(roleBox, 2, 3, 1, 1);
 		grid.add(register,3,4,4,5);
 		grid.add(login, 2,4,4,5);
 		grid.setVgap(10);
@@ -468,7 +466,7 @@ public class Main extends Application {
 		return establishAdminSc;
 	}
 	
-	public Scene establisLogin(){
+	public Scene establishLogin(){
 		Label label = new Label("Login");
 		Button create = new Button("Create");
 		Button backButton = new Button("Back");
@@ -534,7 +532,7 @@ public class Main extends Application {
 	 * 
 	 * 
 	 * */
-	public Scene finishSetupWindow(String username){
+	public Scene finishSetupWindow(String username, String password){
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
 		Button advance = new Button("Continue");
@@ -579,6 +577,17 @@ public class Main extends Application {
 			// If role = admin, redirect to admin
 			// If role = instructor, redirect to instructor
 			// If multiple roles, redirect to role selection
+			try {
+				if (databaseHelper.login(username, password, "Admin")){
+					window.setScene(adminSc);
+				}
+				else {
+					window.setScene(studentSc);
+				}
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			window.setScene(roleWindow());
 			//System.out.println("Logout");

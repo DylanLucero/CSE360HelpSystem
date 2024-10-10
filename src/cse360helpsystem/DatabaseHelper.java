@@ -87,11 +87,12 @@ class DatabaseHelper {
 		}
 	}
 
-	public boolean login(String username, String password) throws SQLException {
-		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ?";
+	public boolean login(String username, String password, String role) throws SQLException {
+		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, password);
+			pstmt.setString(3, role);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				return rs.next();
 			}
