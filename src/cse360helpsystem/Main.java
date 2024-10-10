@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import org.h2.engine.User;
+
 public class Main extends Application {
 	Stage window;
 	
@@ -26,7 +28,7 @@ public class Main extends Application {
 	private static final DatabaseHelper databaseHelper = new DatabaseHelper();
 	private static final Scanner scan = new Scanner(System.in);
 	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -41,6 +43,10 @@ public class Main extends Application {
 		// Needs if-else that checks if database is empty. If database is empty, we create an admin else we go to the normal login page.
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
+			if(databaseHelper.isDatabaseEmpty()) {
+				// System.println("Database is empty, creating admin");
+				window.setScene(establishAdminWindow());
+			}
 		
 		loginPage.setTitle("CSE360 Help System");
 		GridPane grid = new GridPane();
@@ -74,25 +80,23 @@ public class Main extends Application {
 		    }
 
 		    try {
-		        boolean loginSuccessStudent = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
-		        boolean loginSuccessAdmin = databaseHelper.login(userText.getText(), passText.getText(), "Admin");
-		        boolean loginSuccessInstructor = databaseHelper.login(userText.getText(), passText.getText(), "Instructor");
-		        if (loginSuccessStudent) {
-		            System.out.println("Login Success Student");
-		            window.setScene(finishSetupWindow());
+		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText()); // Replace "role" with the actual role you want to check
+		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
+		        if (loginSuccess) {
+		            System.out.println("Login Success Student/Instructor");
+		            if (!databaseHelper.setupComplete(userText.getText())) {
+		                System.out.println("Account setup incomplete, moving to setup page.");
+		            window.setScene(finishSetupWindow(userText.getText()));
 		        } else
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
-		            window.setScene(finishSetupWindow());
+		            window.setScene(finishSetupWindow(userText.getText()));
 		        } else
-		        if (loginSuccessInstructor){
-		        	System.out.println("Login Success Instructor");
-		            window.setScene(finishSetupWindow());
-		        }
-		        else {
+		        {
 			        a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
+		        }
 		        }
 		    } catch (SQLException ex) {
 		        ex.printStackTrace();
@@ -333,9 +337,7 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
-		ComboBox<String> roleBox = new ComboBox<>();
-		roleBox.getItems().addAll("Admin", "Student", "Instructor");
-		roleBox.setPromptText("Choose your role");
+		String role = "";
 
 
 		
@@ -350,6 +352,7 @@ public class Main extends Application {
 				verifyPass.clear();
 				return;
 			}
+			
 			if (databaseHelper.doesUserExist(user.getText())) {
 			    a.setAlertType(AlertType.WARNING);
 			    a.setContentText("User already exists!");
@@ -361,8 +364,79 @@ public class Main extends Application {
 			}
 			else {
 				 String username = user.getText();      // Get the username when button is clicked
-			        String password = pass.getText();      // Get the password when button is clicked
-			        	String role = roleBox.getValue();	// Gets the role when create is clicked
+			     String password = pass.getText();      // Get the password when button is clicked
+			        try {
+			    		if(databaseHelper.isDatabaseEmpty()) {
+			    			databaseHelper.register(username, password, "Admin");
+						}
+						else {
+							databaseHelper.register(username, password, "Student");
+						}
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
+			}
+			window.setScene(loginSc);
+		});
+		
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		
+
+		
+		// Adding to Grid
+		gPane.add(label, 2,0,1,1);
+		gPane.add(user, 2,1,1,1);
+		gPane.add(pass, 2,2,1,1);
+		gPane.add(verifyPass, 2,3,1,1);
+		gPane.add(create,2,5,1,1);
+		gPane.add(backButton,3,5,1,1);
+		gPane.setVgap(10);
+		
+
+		
+		establishSc = new Scene(gPane, 640, 480);
+		return establishSc;
+	}
+	/* Establish Account Window
+	 * -----------------------------------
+	 * - Username 
+	 * - Password 
+	 * - Create
+	 * 
+	 * Needs Logic for database and textfield entries
+	 * */
+	public Scene establishAdminWindow(){
+		Label label = new Label("Create Admin Account");
+		Button create = new Button("Create");
+		Button backButton = new Button("Back");
+		backButton.setOnAction(e -> window.setScene(loginSc));
+		TextField user = new TextField();
+		user.setPromptText("Username");
+		PasswordField pass = new PasswordField();
+		pass.setPromptText("Password");
+		PasswordField verifyPass = new PasswordField();
+		verifyPass.setPromptText("Re-enter Password");
+
+		
+		
+		create.setOnAction(e->{
+			if(!pass.getText().equals(verifyPass.getText())) {
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Passwords do Not match");
+				a.show();
+				user.clear();
+				pass.clear();
+				verifyPass.clear();
+				return;
+			}
+			else {
+				 String username = user.getText();      // Get the username when button is clicked
+			     String password = pass.getText();      // Get the password when button is clicked
+			     String role = "Admin";
 			        try {
 						databaseHelper.register(username, password, role);
 					} catch (SQLException e1) {
@@ -385,9 +459,66 @@ public class Main extends Application {
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
 		gPane.add(verifyPass, 2,3,1,1);
-		gPane.add(roleBox, 2,4,1,1);
 		gPane.add(create,2,5,1,1);
-		gPane.add(backButton,3,5,1,1);
+		gPane.setVgap(10);
+		
+
+		
+		establishAdminSc = new Scene(gPane, 640, 480);
+		return establishAdminSc;
+	}
+	
+	public Scene establisLogin(){
+		Label label = new Label("Login");
+		Button create = new Button("Create");
+		Button backButton = new Button("Back");
+		backButton.setOnAction(e -> window.setScene(establishSc));
+		TextField user = new TextField();
+		user.setPromptText("Username");
+		PasswordField pass = new PasswordField();
+		pass.setPromptText("Password");
+		PasswordField verifyPass = new PasswordField();
+		verifyPass.setPromptText("Re-enter Password");
+
+		
+		
+		create.setOnAction(e->{
+			if(!pass.getText().equals(verifyPass.getText())) {
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Passwords do Not match");
+				a.show();
+				user.clear();
+				pass.clear();
+				verifyPass.clear();
+				return;
+			}
+			else {
+				 String username = user.getText();      // Get the username when button is clicked
+			     String password = pass.getText();      // Get the password when button is clicked
+			     String role = "Admin";
+			        try {
+						databaseHelper.register(username, password, role);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
+			}
+			window.setScene(loginSc);
+		});
+		
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		
+
+		
+		// Adding to Grid
+		gPane.add(label, 2,0,1,1);
+		gPane.add(user, 2,1,1,1);
+		gPane.add(pass, 2,2,1,1);
+		gPane.add(verifyPass, 2,3,1,1);
+		gPane.add(create,2,5,1,1);
 		gPane.setVgap(10);
 		
 
@@ -396,7 +527,6 @@ public class Main extends Application {
 		return establishSc;
 	}
 	
-	
 
 	
 	/* Finish Setting Up Account Window
@@ -404,7 +534,7 @@ public class Main extends Application {
 	 * 
 	 * 
 	 * */
-	public Scene finishSetupWindow(){
+	public Scene finishSetupWindow(String username){
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
 		Button advance = new Button("Continue");
@@ -413,7 +543,7 @@ public class Main extends Application {
 		TextField firstName = new TextField();
 		firstName.setPromptText("First Name");
 		TextField middleName = new TextField();
-		middleName.setPromptText("Middle Name");
+		middleName.setPromptText("Middle Name (Optional)");
 		TextField lastName = new TextField();
 		lastName.setPromptText("Last Name");
 		TextField prefName = new TextField();
@@ -423,6 +553,7 @@ public class Main extends Application {
 		 * Add routing to users correct window
 		 * If more than one role redirect to roleWindow()
 		 * */
+		
 		advance.setOnAction(e->{
 			
 			if(firstName.getText()=="" || lastName.getText()=="" || prefName.getText()=="") {
@@ -431,7 +562,14 @@ public class Main extends Application {
 				a.show();
 				return;
 			}
-			
+			else {
+				try {
+					databaseHelper.updateUserDetails(username, firstName.getText(), lastName.getText(), prefName.getText());
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 			System.out.println("First Name: " + firstName.getText());
 			System.out.println("Middle Name: " + middleName.getText());
 			System.out.println("Last Name: "+ lastName.getText());

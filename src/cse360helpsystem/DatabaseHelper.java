@@ -22,21 +22,42 @@ class DatabaseHelper {
 			System.out.println("Connecting to database...");
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
+			dropTable("cse360users");
 			createTables();  // Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
 	}
+    // Create the cse360users table
+    private void createTables() {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS cse360users ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                + "username VARCHAR(100) UNIQUE, "
+                + "email VARCHAR(100) UNIQUE, "
+                + "password VARCHAR(100), "
+                + "role VARCHAR(50), "
+                + "first_name VARCHAR(50), "
+                + "last_name VARCHAR(50), "
+                + "preferred_name VARCHAR(50), "
+                + "is_setup_complete BOOLEAN DEFAULT NULL);";
 
-	private void createTables() throws SQLException {
-		String userTable = "CREATE TABLE IF NOT EXISTS cse360users ("
-				+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "username VARCHAR(255) UNIQUE, "
-				+ "password VARCHAR(255), "
-				+ "role VARCHAR(20))";
-		statement.execute(userTable);
-	}
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
+            System.out.println("Table created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void dropTable(String tableName) {
+        String dropTableSQL = "DROP TABLE IF EXISTS " + tableName;
 
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(dropTableSQL);
+            System.out.println("Table " + tableName + " has been dropped.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 	// Check if the database is empty
 	public boolean isDatabaseEmpty() throws SQLException {
@@ -66,12 +87,22 @@ class DatabaseHelper {
 		}
 	}
 
-	public boolean login(String username, String password, String role) throws SQLException {
+	public boolean login(String username, String password) throws SQLException {
+		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, username);
+			pstmt.setString(2, password);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				return rs.next();
+			}
+		}
+	}
+	public boolean adminLogin(String username, String password, String role) throws SQLException {
 		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, password);
-			pstmt.setString(3, role);
+			pstmt.setString(3,  role);;
 			try (ResultSet rs = pstmt.executeQuery()) {
 				return rs.next();
 			}
@@ -93,6 +124,31 @@ class DatabaseHelper {
 	        e.printStackTrace();
 	    }
 	    return false; // If an error occurs, assume user doesn't exist
+	}
+	
+	public void updateUserDetails(String username, String firstName, String lastName, String preferredName) throws SQLException {
+		String query = "UPDATE cse360users SET first_name = ?, last_name = ?, preferred_name = ?, is_setup_complete = TRUE WHERE username = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        pstmt.setString(2, firstName);
+	        pstmt.setString(3, lastName);
+	        pstmt.setString(4, preferredName);
+	        pstmt.executeUpdate();
+	    }
+	}
+	public boolean setupComplete(String username) throws SQLException {
+		boolean updateResult = false;
+		String query = "SELECT is_setup_complete FROM cse360users WHERE username = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        ResultSet rs1;
+	        rs1 = pstmt.executeQuery();
+	        rs1.next();
+	        if (rs1.next()) {
+	        	updateResult = rs1.getBoolean("is_setup_complete");
+	        }
+        	return updateResult;
+	    }
 	}
 	
 	public void closeConnection() {
