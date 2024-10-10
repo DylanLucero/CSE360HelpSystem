@@ -16,6 +16,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -25,9 +27,10 @@ public class Main extends Application {
 	Stage window;
 	
 
-	private static final DatabaseHelper databaseHelper = new DatabaseHelper();
-	private static final Scanner scan = new Scanner(System.in);
-	
+	private static DatabaseHelper databaseHelper = new DatabaseHelper();
+    public void setDatabaseHelper(DatabaseHelper databaseHelper) {
+        Main.databaseHelper = databaseHelper;
+    }	
 	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
@@ -60,9 +63,6 @@ public class Main extends Application {
 		userText.setPromptText("Username");
 		PasswordField passText = new PasswordField();
 		passText.setPromptText("Password");
-		ComboBox<String> roleBox = new ComboBox<>();
-		roleBox.getItems().addAll("Admin", "Student", "Instructor");
-		roleBox.setPromptText("Choose what you want to login as");
 		
 		// Buttons
 		Button login = new Button("Login");
@@ -80,17 +80,18 @@ public class Main extends Application {
 		    }
 
 		    try {
-		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText()); // Replace "role" with the actual role you want to check
+		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
 		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
-		        if (loginSuccess) {
-		            System.out.println("Login Success Student/Instructor");
-		            if (!databaseHelper.setupComplete(userText.getText())) {
-		                System.out.println("Account setup incomplete, moving to setup page.");
-		            window.setScene(finishSetupWindow(userText.getText()));
-		        } else
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
-		            window.setScene(finishSetupWindow(userText.getText()));
+		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+		        } else {
+		        if (loginSuccess) {
+		            System.out.println("Login Success Student/Instructor");
+		        }
+		            if (!databaseHelper.setupComplete(userText.getText())) {
+		                System.out.println("Account setup incomplete, moving to setup page.");
+		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 		        } else
 		        {
 			        a.setAlertType(AlertType.ERROR);
@@ -135,7 +136,6 @@ public class Main extends Application {
 		grid.add(label,2,0,1,1);
 		grid.add(userText,2,1,1,1);
 		grid.add(passText,2,2,1,1);
-		grid.add(roleBox, 2, 3, 1, 1);
 		grid.add(register,3,4,4,5);
 		grid.add(login, 2,4,4,5);
 		grid.setVgap(10);
@@ -146,49 +146,6 @@ public class Main extends Application {
 	}
 
 
-	/* Role Selection Window 
-	 * ---------------------------------------------
-	 * This needs to trigger ONLY if the account has
-	 * more than one role, otherwise go straight
-	 * to the accounts role screen
-	 * We'll add the logic for verification
-	*/
-	public Scene roleWindow(){
-		Label title = new Label("Role Selection");
-		MenuButton role = new MenuButton("Click to Select Role");
-		MenuItem sButton = new MenuItem("Student");
-		MenuItem iButton = new MenuItem("Instructor");
-		MenuItem aButton = new MenuItem("Admin");
-		
-		// Button Actions for Menu
-		sButton.setOnAction(e->{ 
-			window.setScene(studentWindow());
-			//System.out.println("Student View");
-			});
-		
-		aButton.setOnAction(e->{ 
-			window.setScene(adminWindow());
-			//System.out.println("Admin View");
-		});
-		
-		iButton.setOnAction(e->{ 
-			window.setScene(instructorWindow());
-			//System.out.println("Instructor View");
-		});
-		
-		// Adding to Grid
-		role.getItems().addAll(sButton, iButton, aButton);
-		GridPane gPane = new GridPane();
-		gPane.setAlignment(Pos.CENTER);
-		gPane.add(role, 3,2,1,1);
-		gPane.add(title,3,1,1,1);
-		gPane.setVgap(10);
-		
-		studentSc = new Scene(gPane, 640, 480);
-		return studentSc;
-	}
-	
-	
 	
 
 	/* Student Window √
@@ -294,6 +251,18 @@ public class Main extends Application {
 		});
 		
 		// List Users - List user accounts from Database
+		listUsers.setOnAction(e->{
+			try {
+				System.out.println("");
+				databaseHelper.printUsers();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		});
+		
+		
 		// Add or Remove Roles - Add or remove roles from user accounts
 		
 		// Pane Mumbo Jumbo
@@ -337,7 +306,7 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
-		String role = "";
+	
 
 
 		
@@ -468,7 +437,7 @@ public class Main extends Application {
 		return establishAdminSc;
 	}
 	
-	public Scene establisLogin(){
+	public Scene establishLogin(){
 		Label label = new Label("Login");
 		Button create = new Button("Create");
 		Button backButton = new Button("Back");
@@ -534,7 +503,7 @@ public class Main extends Application {
 	 * 
 	 * 
 	 * */
-	public Scene finishSetupWindow(String username){
+	public Scene finishSetupWindow(String username, String password){
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
 		Button advance = new Button("Continue");
@@ -562,25 +531,30 @@ public class Main extends Application {
 				a.show();
 				return;
 			}
-			else {
+
 				try {
 					databaseHelper.updateUserDetails(username, firstName.getText(), lastName.getText(), prefName.getText());
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
-			}
-			System.out.println("First Name: " + firstName.getText());
-			System.out.println("Middle Name: " + middleName.getText());
-			System.out.println("Last Name: "+ lastName.getText());
-			System.out.println("Prefered Name: " + prefName.getText());
+				}			
 
 			// If role = student, redirect to student
 			// If role = admin, redirect to admin
 			// If role = instructor, redirect to instructor
 			// If multiple roles, redirect to role selection
+			try {
+				if (databaseHelper.login(username, password, "Admin")){
+					window.setScene(adminWindow());
+				}
+				else {
+					window.setScene(studentWindow());
+				}
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
-			window.setScene(roleWindow());
 			//System.out.println("Logout");
 		});
 		

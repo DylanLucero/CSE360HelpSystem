@@ -48,6 +48,10 @@ class DatabaseHelper {
             e.printStackTrace();
         }
     }
+    
+
+    
+    // Drop the tables
     private void dropTable(String tableName) {
         String dropTableSQL = "DROP TABLE IF EXISTS " + tableName;
 
@@ -87,11 +91,12 @@ class DatabaseHelper {
 		}
 	}
 
-	public boolean login(String username, String password) throws SQLException {
-		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ?";
+	public boolean login(String username, String password, String role) throws SQLException {
+		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			pstmt.setString(2, password);
+			pstmt.setString(3, role);
 			try (ResultSet rs = pstmt.executeQuery()) {
 				return rs.next();
 			}
@@ -126,16 +131,31 @@ class DatabaseHelper {
 	    return false; // If an error occurs, assume user doesn't exist
 	}
 	
+    public void printUsers() throws SQLException {
+        String query = "SELECT * FROM cse360users";
+        ResultSet resultSet = statement.executeQuery(query);
+
+        while (resultSet.next()) {
+            System.out.println("UserName: " + resultSet.getString("username"));
+            System.out.println("First Name: " + resultSet.getString("first_name"));
+           System.out.println("Last Name: " + resultSet.getString("last_name"));
+           System.out.println("Preferred Name: " + resultSet.getString("preferred_name"));
+        }
+       }
+    
+	
 	public void updateUserDetails(String username, String firstName, String lastName, String preferredName) throws SQLException {
-		String query = "UPDATE cse360users SET first_name = ?, last_name = ?, preferred_name = ?, is_setup_complete = TRUE WHERE username = ?";
+		String query = "INSERT INTO cse360users (first_name, last_name, preferred_name) VALUES (?, ?, ?)";
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-	        pstmt.setString(1, username);
-	        pstmt.setString(2, firstName);
-	        pstmt.setString(3, lastName);
-	        pstmt.setString(4, preferredName);
+
+	        pstmt.setString(1, firstName);
+	        pstmt.setString(2, lastName);
+	        pstmt.setString(3, preferredName);
 	        pstmt.executeUpdate();
 	    }
 	}
+	
+
 	public boolean setupComplete(String username) throws SQLException {
 		boolean updateResult = false;
 		String query = "SELECT is_setup_complete FROM cse360users WHERE username = ?";
