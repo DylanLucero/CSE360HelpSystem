@@ -46,6 +46,7 @@ public class Main extends Application {
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
 				window.setScene(establishAdminWindow());
+				window.show();
 			}
 		
 		loginPage.setTitle("CSE360 Help System");
@@ -83,10 +84,16 @@ public class Main extends Application {
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } else {
-		        if (loginSuccess) {
+		        } else if (loginSuccess) {
 		            System.out.println("Login Success Student/Instructor");
+		        } else
+		        {
+			        a.setAlertType(AlertType.ERROR);
+			        a.setContentText("Login error try again.");
+			        a.show();
+			        return;
 		        }
+		        
 		            if (!databaseHelper.setupComplete(userText.getText())) {
 		                System.out.println("Account setup incomplete, moving to setup page.");
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
@@ -97,7 +104,7 @@ public class Main extends Application {
 			        a.show();
 		        }
 		        }
-		    } catch (SQLException ex) {
+		    catch (SQLException ex) {
 		        ex.printStackTrace();
 		        a.setAlertType(AlertType.ERROR);
 		        a.setContentText("Database error occurred.");
