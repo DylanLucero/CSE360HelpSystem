@@ -12,6 +12,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
@@ -82,7 +86,8 @@ public class Main extends Application {
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 		        } else if (loginSuccess) {
 		            System.out.println("Login Success Student/Instructor");
-		        } else {
+		        } 
+		        else {
 		        	a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
@@ -96,11 +101,7 @@ public class Main extends Application {
 			        a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
-		        } if (!databaseHelper.setupComplete(userText.getText())) {
-		               System.out.println("Account setup incomplete, moving to setup page.");
-		               window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } 
-		       
+		        }
 		        
 		    } catch (SQLException ex) {
 		        ex.printStackTrace();
@@ -158,11 +159,37 @@ public class Main extends Application {
 	*/
 	public Scene studentWindow(){
 		Label label = new Label("Student Page");
+		
 		Button logout = new Button("Logout");
+
+		/*
+		Button restore = new Button("Restore");
+		Button backup = new Button("Backup");
+		Button removeAll = new Button("Remove All");
+		Button mergeAll = new Button("Merge All");
+		
+		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 				
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
+		
+		
+		// Opens pop up Dialog so they user can select to restore or backup
+		restore.setOnAction(e->{
+			final Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            GridPane dialog = new GridPane();
+            
+            dialog.add(text,1,1, 1, 1);
+            dialog.add(removeAll,1,3,1,1);
+            dialog.add(mergeAll,1,4,1,1);
+            
+            Scene dialogScene = new Scene(dialog, 500, 200);
+            dialogStage.setScene(dialogScene);
+            dialogStage.show();
+
+		});*/
 		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -170,6 +197,7 @@ public class Main extends Application {
 		// Adding to Grid
 		gPane.add(label, 1,0,1,1);
 		gPane.add(logout,1,2,1,1);
+		//gPane.add(restore, 1,1,1,1);
 		gPane.setVgap(10);
 		
 		studentSc = new Scene(gPane, 640, 480);
@@ -187,7 +215,33 @@ public class Main extends Application {
 	public Scene instructorWindow(){
 		Label label = new Label("Instructor Page");
 		Button logout = new Button("Logout");
+		Button restore = new Button("Restore");
+		Button backup = new Button("Backup");
+		Button removeAll = new Button("Remove All");
+		Button mergeAll = new Button("Merge All");
 		
+		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
+				
+		logout.setOnAction(e->{
+			window.setScene(loginSc);
+		});
+		
+		
+		// Opens pop up Dialog so they user can select to restore or backup
+		restore.setOnAction(e->{
+			final Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            GridPane dialog = new GridPane();
+            
+            dialog.add(text,1,1, 1, 1);
+            dialog.add(removeAll,1,3,1,1);
+            dialog.add(mergeAll,1,4,1,1);
+            
+            Scene dialogScene = new Scene(dialog, 300, 200);
+            dialogStage.setScene(dialogScene);
+            dialogStage.show();
+
+		});
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -197,7 +251,9 @@ public class Main extends Application {
 		
 		// Adding to Grid
 		gPane.add(label, 1,1,1,1);
-		gPane.add(logout,1,2,1,1);
+		gPane.add(logout,1,4,1,1);
+		gPane.add(restore, 1,2,1,1);
+		gPane.add(backup,1,3,1,1);
 		gPane.setVgap(10);
 
 		instructorSc = new Scene(gPane, 640, 480);
@@ -222,12 +278,20 @@ public class Main extends Application {
 	public Scene adminWindow(){
 		Label label = new Label("Admin Page");
 		TextField otp = new TextField();
+		
+		Button restore = new Button("Restore");
+		Button backup = new Button("Backup");
 		Button inviteUser = new Button("Invite User");
 		Button resetUser = new Button("Reset User Account");
 		Button deleteUser = new Button("Delete User Account");
 		Button listUsers = new Button("List Known Users");
 		Button addRemoveRoles = new Button("Add/Remove Roles"); // Thinking a checkbox system of some sort
 		Button logout = new Button("Logout");
+		Button removeAll = new Button("Remove All");
+		Button mergeAll = new Button("Merge All");
+		
+		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
+
 		
 		// Button Functions
 		//Logout
@@ -264,6 +328,23 @@ public class Main extends Application {
 			}
 			
 		});
+
+		
+		// Logic for restore Button
+		//Opens a pop up window, add logic for removeAll and mergeAll Buttons
+		restore.setOnAction(e->{
+			final Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            GridPane dialog = new GridPane();
+            
+            dialog.add(text,1,1, 1, 1);
+            dialog.add(removeAll,1,3,1,1);
+            dialog.add(mergeAll,1,4,1,1);
+            
+            Scene dialogScene = new Scene(dialog, 300, 200);
+            dialogStage.setScene(dialogScene);
+            dialogStage.show();
+		});
 		
 		
 		// Add or Remove Roles - Add or remove roles from user accounts
@@ -280,7 +361,9 @@ public class Main extends Application {
 		gPane.add(deleteUser,1,4,2,1);
 		gPane.add(listUsers,1,5,2,1);
 		gPane.add(addRemoveRoles,1,6,2,1);
-		gPane.add(logout,1,7,2,1);
+		gPane.add(backup,1,7,2,1);
+		gPane.add(restore,1,8,2,1);
+		gPane.add(logout,1,9,2,1);
 		gPane.setVgap(10);
 
 		adminSc = new Scene(gPane, 640, 480);
@@ -533,7 +616,7 @@ public class Main extends Application {
 				a.setContentText("Fields left empty.");
 				a.show();
 				return;
-			}
+			} 
 
 				try {
 					databaseHelper.updateUserDetails(username, firstName.getText(), lastName.getText(), prefName.getText());
@@ -592,7 +675,4 @@ public static void main(String[] args) {
 	
 
 	}
-private static void adminFlow() throws SQLException {
-
-}
 }
