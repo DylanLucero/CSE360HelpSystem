@@ -169,12 +169,12 @@ public class Main extends Application {
 		Button mergeAll = new Button("Merge All");
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
-				
+		*/		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
 		
-		
+		/*
 		// Opens pop up Dialog so they user can select to restore or backup
 		restore.setOnAction(e->{
 			final Stage dialogStage = new Stage();
