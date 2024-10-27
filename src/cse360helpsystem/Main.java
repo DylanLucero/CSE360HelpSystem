@@ -161,36 +161,11 @@ public class Main extends Application {
 		Label label = new Label("Student Page");
 		
 		Button logout = new Button("Logout");
-
-		/*
-		Button restore = new Button("Restore");
-		Button backup = new Button("Backup");
-		Button removeAll = new Button("Remove All");
-		Button mergeAll = new Button("Merge All");
 		
-		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
-		*/		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
-		
-		/*
-		// Opens pop up Dialog so they user can select to restore or backup
-		restore.setOnAction(e->{
-			final Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            GridPane dialog = new GridPane();
-            
-            dialog.add(text,1,1, 1, 1);
-            dialog.add(removeAll,1,3,1,1);
-            dialog.add(mergeAll,1,4,1,1);
-            
-            Scene dialogScene = new Scene(dialog, 500, 200);
-            dialogStage.setScene(dialogScene);
-            dialogStage.show();
 
-		});*/
-		
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
 		
@@ -214,6 +189,15 @@ public class Main extends Application {
 	*/
 	public Scene instructorWindow(){
 		Label label = new Label("Instructor Page");
+		Label articleTitle = new Label("Article Title");
+		
+		//Buttons
+		
+		Button listArticles = new Button("List Article");
+		Button viewArticle = new Button("View Article");
+		Button createArticle = new Button("Create Article");
+		Button updateArticle = new Button("Update Article");
+		Button removeArticle = new Button("Remove Article");
 		Button logout = new Button("Logout");
 		Button restore = new Button("Restore");
 		Button backup = new Button("Backup");
@@ -221,9 +205,24 @@ public class Main extends Application {
 		Button mergeAll = new Button("Merge All");
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
+		Text articleText = new Text("This is an article");
 				
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
+		});
+		
+		// For Viewing the article, creates a pop up
+		viewArticle.setOnAction(e->{
+			final Stage articleStage = new Stage();
+			articleStage.initModality(Modality.APPLICATION_MODAL);
+            GridPane article = new GridPane();
+            
+            article.add(articleTitle,2,1, 1, 1);
+            article.add(articleText,1,2,1,1);
+            
+            Scene dialogScene = new Scene(article, 300, 200);
+            articleStage.setScene(dialogScene);
+            articleStage.show();
 		});
 		
 		
@@ -242,6 +241,8 @@ public class Main extends Application {
             dialogStage.show();
 
 		});
+		
+		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
@@ -251,9 +252,15 @@ public class Main extends Application {
 		
 		// Adding to Grid
 		gPane.add(label, 1,1,1,1);
-		gPane.add(logout,1,4,1,1);
-		gPane.add(restore, 1,2,1,1);
-		gPane.add(backup,1,3,1,1);
+		gPane.add(viewArticle, 1,2,1,1);
+		gPane.add(updateArticle, 1,3,1,1);
+		gPane.add(removeArticle, 1,4,1,1);
+		gPane.add(listArticles, 1,5,1,1);
+		gPane.add(createArticle, 1,6,1,1);
+
+		gPane.add(restore, 1,7,1,1);
+		gPane.add(backup,1,8,1,1);
+		gPane.add(logout,1,9,1,1);
 		gPane.setVgap(10);
 
 		instructorSc = new Scene(gPane, 640, 480);
@@ -277,6 +284,8 @@ public class Main extends Application {
 	*/
 	public Scene adminWindow(){
 		Label label = new Label("Admin Page");
+		Label articleTitle = new Label("Article Title");
+
 		TextField otp = new TextField();
 		
 		Button restore = new Button("Restore");
@@ -289,8 +298,15 @@ public class Main extends Application {
 		Button logout = new Button("Logout");
 		Button removeAll = new Button("Remove All");
 		Button mergeAll = new Button("Merge All");
+		Button listArticles = new Button("List Article");
+		Button viewArticle = new Button("View Article");
+		Button createArticle = new Button("Create Article");
+		Button updateArticle = new Button("Update Article");
+		Button removeArticle = new Button("Remove Article");
+		
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
+		Text articleText = new Text("This is an article");
 
 		
 		// Button Functions
@@ -328,6 +344,20 @@ public class Main extends Application {
 			}
 			
 		});
+		
+		viewArticle.setOnAction(e->{
+			final Stage articleStage = new Stage();
+			articleStage.initModality(Modality.APPLICATION_MODAL);
+            GridPane article = new GridPane();
+            
+            article.add(articleTitle,1,1, 1, 1);
+            article.add(articleText,1,2,1,1);
+            
+            Scene dialogScene = new Scene(article, 300, 200);
+            articleStage.setScene(dialogScene);
+            articleStage.show();
+		});
+		
 
 		
 		// Logic for restore Button
@@ -357,6 +387,12 @@ public class Main extends Application {
 		gPane.add(label, 1,0,2,1);
 		gPane.add(inviteUser,1,2,1,1);
 		gPane.add(otp,3,2,2,1);
+		gPane.add(viewArticle, 3,3,1,1);
+		gPane.add(updateArticle, 3,4,1,1);
+		gPane.add(removeArticle, 3,5,1,1);
+		gPane.add(listArticles, 3,6,1,1);
+		gPane.add(createArticle, 3,7,1,1);
+
 		gPane.add(resetUser,1,3,2,1);
 		gPane.add(deleteUser,1,4,2,1);
 		gPane.add(listUsers,1,5,2,1);
