@@ -174,8 +174,6 @@ class DatabaseHelper {
 			pstmt.executeUpdate();
 		}
 	}
-	
-
 	public boolean setupComplete(String username) throws SQLException {
 		boolean updateResult = false;
 		String query = "SELECT is_setup_complete FROM cse360users WHERE username = ?";
