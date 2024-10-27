@@ -39,7 +39,13 @@ class DatabaseHelper {
                 + "role VARCHAR(50), "
                 + "first_name VARCHAR(50), "
                 + "last_name VARCHAR(50), "
-                + "preferred_name VARCHAR(50), "
+                + "preferred_name VARCHAR(50),"
+                + "abstract VARCHAR(500),"
+                + "header VARCHAR(250),"
+                + "keywords VARCHAR(250),"
+                + "title VARCHAR(50),"
+                + "references VARCHAR(500),"
+                + "body VARCHAR(2500),"
                 + "is_setup_complete BOOLEAN DEFAULT NULL);";
 
         try (Statement stmt = connection.createStatement()) {
@@ -154,6 +160,19 @@ class DatabaseHelper {
 	        pstmt.setString(3, preferredName);
 	        pstmt.executeUpdate();
 	    }
+	}
+	
+	public void articleData(String title, String header, String abstractContent, String body, String keywords, String references) throws SQLException {
+		String insertBody = "INSERT INTO cse360users (author, title, abstractContent, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement pstmt = connection.prepareStatement(insertBody)) {
+			pstmt.setString(1, title);
+			pstmt.setString(2, header);
+			pstmt.setString(3, abstractContent);
+			pstmt.setString(4, body);
+			pstmt.setString(5, keywords);
+			pstmt.setString(6, references);
+			pstmt.executeUpdate();
+		}
 	}
 	
 

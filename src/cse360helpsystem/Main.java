@@ -8,23 +8,26 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
 import java.sql.SQLException;
+import java.util.Scanner;
 
+import org.h2.engine.User;
 
 public class Main extends Application {
 	Stage window;
 	
 
-	private static DatabaseHelper databaseHelper = new DatabaseHelper();
-    public void setDatabaseHelper(DatabaseHelper databaseHelper) {
-        Main.databaseHelper = databaseHelper;
-    }	
+	private static final DatabaseHelper databaseHelper = new DatabaseHelper();
+	private static final Scanner scan = new Scanner(System.in);
+	
 	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
@@ -58,6 +61,7 @@ public class Main extends Application {
 		userText.setPromptText("Username");
 		PasswordField passText = new PasswordField();
 		passText.setPromptText("Password");
+		ComboBox<String> roleBox = new ComboBox<>();
 		
 		// Buttons
 		Button login = new Button("Login");
@@ -82,23 +86,20 @@ public class Main extends Application {
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 		        } else if (loginSuccess) {
 		            System.out.println("Login Success Student/Instructor");
-		        } else {
-		        	a.setAlertType(AlertType.ERROR);
-			        a.setContentText("Login error try again.");
-			        a.show();
-			        return;
-		        }
-		            if (!databaseHelper.setupComplete(userText.getText())) {
-		                System.out.println("Account setup incomplete, moving to setup page.");
-		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 		        } else
 		        {
 			        a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
+			        return;
 		        }
 		        
-		    } catch (SQLException ex) {
+		            if (!databaseHelper.setupComplete(userText.getText())) {
+		                System.out.println("Account setup incomplete, moving to setup page.");
+		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+		        } 
+		       }
+		    catch (SQLException ex) {
 		        ex.printStackTrace();
 		        a.setAlertType(AlertType.ERROR);
 		        a.setContentText("Database error occurred.");
@@ -145,6 +146,49 @@ public class Main extends Application {
 	}
 
 
+	/* Role Selection Window 
+	 * ---------------------------------------------
+	 * This needs to trigger ONLY if the account has
+	 * more than one role, otherwise go straight
+	 * to the accounts role screen
+	 * We'll add the logic for verification
+	*/
+	public Scene roleWindow(){
+		Label title = new Label("Role Selection");
+		MenuButton role = new MenuButton("Click to Select Role");
+		MenuItem sButton = new MenuItem("Student");
+		MenuItem iButton = new MenuItem("Instructor");
+		MenuItem aButton = new MenuItem("Admin");
+		
+		// Button Actions for Menu
+		sButton.setOnAction(e->{ 
+			window.setScene(studentWindow());
+			//System.out.println("Student View");
+			});
+		
+		aButton.setOnAction(e->{ 
+			window.setScene(adminWindow());
+			//System.out.println("Admin View");
+		});
+		
+		iButton.setOnAction(e->{ 
+			window.setScene(instructorWindow());
+			//System.out.println("Instructor View");
+		});
+		
+		// Adding to Grid
+		role.getItems().addAll(sButton, iButton, aButton);
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(role, 3,2,1,1);
+		gPane.add(title,3,1,1,1);
+		gPane.setVgap(10);
+		
+		studentSc = new Scene(gPane, 640, 480);
+		return studentSc;
+	}
+	
+	
 	
 
 	/* Student Window √
@@ -250,18 +294,6 @@ public class Main extends Application {
 		});
 		
 		// List Users - List user accounts from Database
-		listUsers.setOnAction(e->{
-			try {
-				System.out.println("");
-				databaseHelper.printUsers();
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-		});
-		
-		
 		// Add or Remove Roles - Add or remove roles from user accounts
 		
 		// Pane Mumbo Jumbo
@@ -305,7 +337,7 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
-	
+		String role = "";
 
 
 		
@@ -530,13 +562,19 @@ public class Main extends Application {
 				a.show();
 				return;
 			}
-
+			else {
 				try {
 					databaseHelper.updateUserDetails(username, firstName.getText(), lastName.getText(), prefName.getText());
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}			
+
+				}
+			}
+			System.out.println("First Name: " + firstName.getText());
+			System.out.println("Middle Name: " + middleName.getText());
+			System.out.println("Last Name: "+ lastName.getText());
+			System.out.println("Prefered Name: " + prefName.getText());
 
 			// If role = student, redirect to student
 			// If role = admin, redirect to admin
@@ -544,16 +582,17 @@ public class Main extends Application {
 			// If multiple roles, redirect to role selection
 			try {
 				if (databaseHelper.login(username, password, "Admin")){
-					window.setScene(adminWindow());
+					window.setScene(adminSc);
 				}
 				else {
-					window.setScene(studentWindow());
+					window.setScene(studentSc);
 				}
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
+			window.setScene(roleWindow());
 			//System.out.println("Logout");
 		});
 		
