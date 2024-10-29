@@ -1,6 +1,5 @@
 package cse360helpsystem;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 
@@ -26,7 +25,7 @@ class DatabaseHelper {
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
 			//Re-enable this if you want to get rid of everything in database.
-			//dropTable("cse360users");
+			dropTable("cse360users");
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {

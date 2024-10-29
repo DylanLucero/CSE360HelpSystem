@@ -28,7 +28,7 @@ public class Main extends Application {
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc, restoreSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -43,6 +43,7 @@ public class Main extends Application {
 		// Needs if-else that checks if database is empty. If database is empty, we create an admin else we go to the normal login page.
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
+			databaseHelper.connectToSecondaryDatabase();
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
 				window.setScene(establishAdminWindow());
@@ -221,7 +222,7 @@ public class Main extends Application {
 		
 		removeArticle.setOnAction(e->{
 			// Enter Article ID
-			//window.setScene(removeArticleWindow());
+			window.setScene(removeArticleWindow());
 		});
 		
 		updateArticle.setOnAction(e->{
@@ -320,16 +321,12 @@ public class Main extends Application {
 		Button listUsers = new Button("List Known Users");
 		Button addRemoveRoles = new Button("Add/Remove Roles");
 		Button logout = new Button("Logout");
-		Button removeAll = new Button("Remove All");
-		Button mergeAll = new Button("Merge All");
 		Button listArticles = new Button("List Article");
 		Button viewArticle = new Button("View Article");
 		Button createArticle = new Button("Create Article");
 		Button updateArticle = new Button("Update Article");
 		Button removeArticle = new Button("Remove Article");
 		
-		
-		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
 
 		updateArticle.setOnAction(e->{
@@ -378,9 +375,10 @@ public class Main extends Application {
 			window.setScene(createArticleWindow());
 		});
 		
-		//Removing an article
+		//Removing an Article
 		removeArticle.setOnAction(e->{
-			
+			// Enter Article ID
+			window.setScene(removeArticleWindow());
 		});
 
 		
@@ -403,18 +401,7 @@ public class Main extends Application {
 		// Restore Button
 		//Opens a pop up window, add logic for removeAll and mergeAll Buttons
 		restore.setOnAction(e->{
-			final Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            GridPane dialog = new GridPane();
-            
-            dialog.add(text,1,1, 1, 1);
-            dialog.add(removeAll,1,3,1,1);
-            dialog.add(mergeAll,1,4,1,1);
-            
-            
-            Scene dialogScene = new Scene(dialog, 300, 200);
-            dialogStage.setScene(dialogScene);
-            dialogStage.show();
+			window.setScene(restoreWindow());
 		});
 		
 		
@@ -475,6 +462,32 @@ public class Main extends Application {
 		return updateArticleSc;
 	}
 	//REMOVING ARTICLE WINDOW
+	public Scene removeArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextField articleID = new TextField();
+		articleID.setPromptText("Enter Article ID");
+		articleID.setPrefWidth(400);
+		Button update = new Button("Remove");
+		Button cancel = new Button("Cancel");
+	
+		GridPane gPane = new GridPane();
+	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		
+		gPane.add(articleID,1,1,1,1);
+		gPane.add(update,1,2,1,1);
+		gPane.add(cancel,2,2,1,1);
+		
+		removeArticleSc = new Scene(gPane, 640, 480);
+		return removeArticleSc;
+	}
 	
 	//CREATING AN ARTICLE WINDOW
 	public Scene createArticleWindow() {
@@ -805,7 +818,41 @@ public class Main extends Application {
 		return setupSc;
 	}
 	
-	
+	public Scene restoreWindow() {
+		Button removeAll = new Button("Remove All");
+		Button mergeAll = new Button("Merge All");
+		Button goBack = new Button("Go Back");
+		
+		Text text = new Text("What would you like to do?");
+		
+		
+		
+		GridPane gPane = new GridPane();
+		
+		
+		// Add logic to remove the thingies
+		removeAll.setOnAction(e->{
+			
+		});
+		
+		
+		// Add logic for merging the thingies
+		mergeAll.setOnAction(e->{
+			
+		});
+		
+		goBack.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		gPane.add(text,1,1,1,1);
+		gPane.add(removeAll,1,2,1,1);
+		gPane.add(mergeAll,2,2,1,1);
+		gPane.add(goBack,3,2,1,1);
+		
+		restoreSc = new Scene(gPane, 640, 480);
+		return restoreSc;
+	}
 
 public static void main(String[] args) {
 	Application.launch(args);
