@@ -3,10 +3,10 @@ package cse360helpsystem;
  * This class manages the file record
  */
 public class FileRecord {
-    private String filename; //file neam 
-    private byte[] fileData; //file data
+    private String filename; //file name 
+    private String fileData; //file data
 //constructor 
-    public FileRecord(String filename, byte[] fileData) {
+    public FileRecord(String filename, String fileData) {
         this.filename = filename;
         this.fileData = fileData;
     }
@@ -16,7 +16,7 @@ public class FileRecord {
 		return filename;
 	}
 	
-	public byte[] getFileData() {
+	public String getFileData() {
 		return fileData;
 	}
 

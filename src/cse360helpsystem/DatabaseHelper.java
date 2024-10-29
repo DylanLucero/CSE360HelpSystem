@@ -1,5 +1,8 @@
 package cse360helpsystem;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
+
 
 
 class DatabaseHelper {
@@ -24,13 +27,27 @@ class DatabaseHelper {
 			statement = connection.createStatement(); 
 			//Re-enable this if you want to get rid of everything in database.
 			//dropTable("cse360users");
-			createTables();  // Create the necessary tables if they don't exist
+			createTableUsers();  // Create the necessary tables if they don't exist
+			createTableArticles();
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
 	}
+	
+	/*
+	 * Need to call this method in main!! to connect to second database 
+	 */
+	public void connectToSecondaryDatabase() throws Exception{
+		SecondDatabase dbHelper = new SecondDatabase();
+		 try {
+		        dbHelper.connectToDatabase(); 
+		        System.out.println("Connecting to database 1");
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		    }
+	}
     // Create the cse360users table
-    private void createTables() {
+    private void createTableUsers() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS cse360users ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY,"
                 + "username VARCHAR(100) UNIQUE, "
@@ -40,12 +57,6 @@ class DatabaseHelper {
                 + "first_name VARCHAR(50), "
                 + "last_name VARCHAR(50), "
                 + "preferred_name VARCHAR(50),"
-                + "abstract VARCHAR(500),"
-                + "header VARCHAR(250),"
-                + "keywords VARCHAR(250),"
-                + "title VARCHAR(50),"
-                + "references VARCHAR(500),"
-                + "body VARCHAR(2500),"
                 + "is_setup_complete BOOLEAN DEFAULT NULL);";
 
         try (Statement stmt = connection.createStatement()) {
@@ -56,7 +67,6 @@ class DatabaseHelper {
         }
     }
     
-
     
     // Drop the tables
     private void dropTable(String tableName) {
@@ -189,6 +199,116 @@ class DatabaseHelper {
 	    }
 	}
 	
+/*
+ * Article table 
+ */
+
+    private void createTableArticles() throws SQLException {
+    	String createTableSQL = "CREATE TABLE IF NOT EXISTS articleList ("
+    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+    			+ "articleGroup VARCHAR(255), "
+				+ "title VARCHAR(255), " //article title
+				+ "authors VARCHAR(255), " //authors of the article 
+				+ "abstract VARCHAR(255), " //abstract of the article 
+				+ "keywords VARCHAR(255), " //keywords related to the article
+				+ "body VARCHAR(255), " //body of the article
+				+ "references VARCHAR(255)" //references related to the article 
+				+ ");";
+		statement.execute(createTableSQL); //execute table creation
+    }
+	/*
+	 * 
+	 * 
+	 * Secondary Database interaction
+	 */
+	
+	public void backup(String filename) throws Exception {
+		//get to string
+		
+		FileRecord fileRecord = createNewFileRecord(filename);
+		SecondDatabase.storeFileAsBlob(fileRecord);
+		System.out.println("System Sucessfully Backed Up");
+	}
+/**
+ * Restore encrypted file to table 
+ * @param filename
+ * @throws Exception
+ */
+	public void restore(String filename) throws Exception {
+	    FileRecord fileRecord = SecondDatabase.retrieveFileAsBlob(filename);
+	    // Check if filedata is null 
+	    if (fileRecord == null || fileRecord.getFileData() == null) {
+	        System.out.println("Cannot restore: file data is null.");
+	        return;
+	    }
+	    insertDataFromFileRecord(fileRecord);
+	    System.out.println("Successful Merge");
+	    
+	}
+	
+	/*
+	 * Creates a new instance of FileRecord 
+	 */
+	public FileRecord createNewFileRecord(String filename) throws SQLException{
+		String query = "SELECT * FROM articleList";
+        ResultSet resultSet = statement.executeQuery(query);
+        
+		StringBuilder sb = new StringBuilder();
+        
+        // Convert ResultSet to a String
+        while (resultSet.next()) {
+            sb.append("Group: ").append(resultSet.getString("group")).append(", ")
+              .append("Title: ").append(resultSet.getString("title")).append(", ")
+              .append("Authors: ").append(resultSet.getString("authors")).append(", ")
+              .append("Abstract: ").append(resultSet.getString("abstract")).append(", ")
+              .append("Keywords: ").append(resultSet.getString("keywords")).append(", ")
+              .append("Body: ").append(resultSet.getString("body")).append(", ")
+              .append("References: ").append(resultSet.getString("references")).append("\n");
+        }
+        
+        // Compress the string data
+        String filedata = sb.toString();
+		FileRecord fileRecord = new FileRecord(filename, filedata);
+		return fileRecord;
+		
+	}
+	
+	public void insertDataFromFileRecord(FileRecord myFile) throws IOException, SQLException {
+	    // Convert byte array to String using UTF-8 encoding
+	    // Clear the table
+	    String truncateSQL = "TRUNCATE TABLE articleList"; //truncating table data
+	    try (Statement statement = connection.createStatement()) {
+	        statement.executeUpdate(truncateSQL);
+	    }
+		
+		String dataString = new String(myFile.getFileData());
+	    
+	    // Split the data into lines
+	    String[] lines = dataString.split("\n");
+
+        // Prepare SQL statement
+        String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+            for (String line : lines) {
+                // Split each line into fields (assuming CSV format)
+                String[] fields = line.split(", ");
+                
+                // Ensure there are enough fields
+                if (fields.length == 7) {
+                    preparedStatement.setString(1, fields[0].split(": ")[1]); // Group
+                    preparedStatement.setString(2, fields[1].split(": ")[1]); // Title
+                    preparedStatement.setString(3, fields[2].split(": ")[1]); // Authors
+                    preparedStatement.setString(4, fields[3].split(": ")[1]); // Abstract
+                    preparedStatement.setString(5, fields[4].split(": ")[1]); // Keywords
+                    preparedStatement.setString(6, fields[5].split(": ")[1]); // Body
+                    preparedStatement.setString(7, fields[6].split(": ")[1]); // References
+                    
+                    // Execute the insert
+                    preparedStatement.executeUpdate();
+                }
+            }
+        }
+    }
 	public void closeConnection() {
 		try{ 
 			if(statement!=null) statement.close(); 

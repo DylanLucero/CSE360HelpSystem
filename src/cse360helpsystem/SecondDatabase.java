@@ -67,15 +67,17 @@ class SecondDatabase {
     /**
      * This method store the filename and data into file table
      * 
-     * @param file name and encrypted file data as byte[]
+     * @param file name and string of filedata
      * 
      */
-    public static void storeFileAsBlob(String filename, byte[] fileData) throws SQLException {
-        String sql = "INSERT INTO fileTable (filename, filedata) VALUES (?, ?)";
+    public static void storeFileAsBlob(FileRecord filerecord) throws SQLException {
+        String filename = filerecord.getFilename();
+        String filedata = filerecord.getFileData();
+    	String sql = "INSERT INTO fileTable (filename, filedata) VALUES (?, ?)";
        //send sql statement to insert filedata into table
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, filename); //set filename
-            pstmt.setBytes(2, fileData); //set data 
+            pstmt.setString(2, filedata); //set data 
             try {
                 pstmt.executeUpdate(); //send update
             } catch (SQLException e) {
@@ -94,6 +96,7 @@ class SecondDatabase {
  * 
  * @param name of file 
  * @return encrypted byte string
+ * needs work
  */
     public static FileRecord retrieveFileAsBlob(String filename) throws SQLException {
         String sql = "SELECT filename, filedata FROM fileTable WHERE filename = ?";
@@ -102,7 +105,7 @@ class SecondDatabase {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 String retrievedFilename = rs.getString("filename");
-                byte[] fileData = rs.getBytes("filedata");
+                String fileData = rs.getString("filedata");
                 return new FileRecord(retrievedFilename, fileData);
             } else {
             	System.out.println("File not found.");
