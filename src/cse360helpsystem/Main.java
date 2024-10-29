@@ -10,6 +10,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -27,7 +28,7 @@ public class Main extends Application {
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -108,9 +109,6 @@ public class Main extends Application {
 		        a.show();
 		    }
 		    
-		    
-			
-			
 			System.out.println("Username: " + userText.getText());
 			System.out.println("Password: " + passText.getText());
 			
@@ -159,13 +157,6 @@ public class Main extends Application {
 		Label label = new Label("Student Page");
 		
 		Button logout = new Button("Logout");
-		Button viewArticle = new Button("View Article");
-
-		
-		Label articleTitle = new Label("Article Title");
-		Text articleText = new Text("This is an article");
-
-
 		
 		TextField createTitle = new TextField();
 		createTitle.setPromptText("Enter Title");
@@ -177,20 +168,6 @@ public class Main extends Application {
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
-		
-		//Create Article
-		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.NONE);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,2,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
-		});
 
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -198,7 +175,6 @@ public class Main extends Application {
 		// Adding to Grid
 		gPane.add(label, 1,0,1,1);
 		gPane.add(logout,1,2,1,1);
-		gPane.add(viewArticle, 1,1,1,1);
 		gPane.setVgap(10);
 		
 		studentSc = new Scene(gPane, 640, 480);
@@ -228,7 +204,6 @@ public class Main extends Application {
 		Button backup = new Button("Backup");
 		Button removeAll = new Button("Remove All");
 		Button mergeAll = new Button("Merge All");
-		Button okArticle = new Button("OK");
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
@@ -241,6 +216,22 @@ public class Main extends Application {
 		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
+		});
+		
+		
+		removeArticle.setOnAction(e->{
+			// Enter Article ID
+			//window.setScene(removeArticleWindow());
+		});
+		
+		updateArticle.setOnAction(e->{
+			// Enter Article ID
+			window.setScene(updateArticleWindow());
+		});
+		
+		
+		createArticle.setOnAction(e->{
+			window.setScene(createArticleWindow());
 		});
 		
 		// For Viewing the article, creates a pop up
@@ -256,29 +247,7 @@ public class Main extends Application {
             articleStage.setScene(dialogScene);
             articleStage.show();
 		});
-		
-		removeArticle.setOnAction(e->{
-			
-		});
-		
-		updateArticle.setOnAction(e->{
-			
-		});
-		
-		//Creating an article
-		createArticle.setOnAction(e->{
-			final Stage creatingArticle = new Stage();
-			creatingArticle.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(createTitle,1,1, 1, 1);
-            article.add(createBody,1,3,2,4);
-            article.add(okArticle, 1,4,1,1);
-            
-            Scene articleScene = new Scene(article, 300, 200);
-            creatingArticle.setScene(articleScene);
-            creatingArticle.show();
-		});
+
 		
 		
 		// Opens pop up Dialog so they user can select to restore or backup
@@ -342,11 +311,7 @@ public class Main extends Application {
 		Label articleTitle = new Label("Article Title");
 
 		TextField otp = new TextField();
-		TextField createTitle = new TextField();
-		createTitle.setPromptText("Enter Title");
-		TextField createBody = new TextField();
-		createBody.setPromptText("Enter Article");
-		
+
 		Button restore = new Button("Restore");
 		Button backup = new Button("Backup");
 		Button inviteUser = new Button("Invite User");
@@ -362,13 +327,15 @@ public class Main extends Application {
 		Button createArticle = new Button("Create Article");
 		Button updateArticle = new Button("Update Article");
 		Button removeArticle = new Button("Remove Article");
-		Button okArticle = new Button("OK");
 		
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
 
-		
+		updateArticle.setOnAction(e->{
+			// Enter Article ID
+			window.setScene(updateArticleWindow());
+		});
 		// Button Functions
 		//Logout
 		logout.setOnAction(e->{
@@ -408,28 +375,14 @@ public class Main extends Application {
 		//----------------- Article Functions----------------------
 		//Create Article
 		createArticle.setOnAction(e->{
-			final Stage creatingArticle = new Stage();
-			creatingArticle.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(createTitle,1,1, 1, 1);
-            article.add(createBody,1,3,2,4);
-            article.add(okArticle, 1,4,1,1);
-            
-            Scene articleScene = new Scene(article, 300, 200);
-            creatingArticle.setScene(articleScene);
-            creatingArticle.show();
+			window.setScene(createArticleWindow());
 		});
 		
 		//Removing an article
 		removeArticle.setOnAction(e->{
 			
 		});
-		
-		//Updating an article
-		updateArticle.setOnAction(e->{
-			
-		});
+
 		
 		// View Article
 		viewArticle.setOnAction(e->{
@@ -445,7 +398,7 @@ public class Main extends Application {
             articleStage.show();
 		});
 		
-
+		
 		
 		// Restore Button
 		//Opens a pop up window, add logic for removeAll and mergeAll Buttons
@@ -494,8 +447,71 @@ public class Main extends Application {
 		return adminSc;
 	}
 	
+	//UPDATING ARTICLE WINDOW
+	public Scene updateArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextArea articleID = new TextArea();
+		articleID.setPromptText("Enter Article ID");
+		articleID.setPrefWidth(400);
+		Button update = new Button("Update");
+		Button cancel = new Button("Cancel");
 	
+		GridPane gPane = new GridPane();
 	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		
+		gPane.add(articleID,1,1,1,1);
+		gPane.add(update,1,2,1,1);
+		gPane.add(cancel,2,2,1,1);
+		
+		updateArticleSc = new Scene(gPane, 640, 480);
+		return updateArticleSc;
+	}
+	//REMOVING ARTICLE WINDOW
+	
+	//CREATING AN ARTICLE WINDOW
+	public Scene createArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		Button create = new Button("Create");
+		Button back = new Button("Back");
+		
+		TextField createTitle = new TextField();
+		createTitle.setPromptText("Title");
+		TextArea createBody = new TextArea();
+		createBody.setPromptText("Enter article");
+		createBody.setPrefHeight(400);
+		
+		back.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		
+		
+		createTitle.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(createTitle,1,1,2,1);
+		gPane.add(createBody,1,2,2,1);
+		gPane.add(create,1,3,1,1);
+		gPane.add(back,2,3,1,1);
+		
+		createArticleSc = new Scene(gPane,640,480);
+		return createArticleSc;
+	}
 	
 	/* Establish Account Window
 	 * -----------------------------------
@@ -516,9 +532,6 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
-	
-
-
 		
 		
 		create.setOnAction(e->{

@@ -27,8 +27,8 @@ class DatabaseHelper {
 			statement = connection.createStatement(); 
 			//Re-enable this if you want to get rid of everything in database.
 			//dropTable("cse360users");
-			createTableUsers();  // Create the necessary tables if they don't exist
-			createTableArticles();
+			createTableUsers();
+			createTableArticles();// Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}

@@ -11,8 +11,13 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+<<<<<<< Updated upstream
 	<classpathentry kind="lib" path="/Users/oliviapratt/h2/bin/h2-2.3.232.jar"/>
 	<classpathentry kind="lib" path="/Users/oliviapratt/Downloads/hamcrest-2.2.jar">
+=======
+	<classpathentry kind="lib" path="/Users/messiah/eclipse-workspace/CSE360HelpSystem/h2/bin/h2-2.3.232.jar"/>
+	<classpathentry kind="lib" path="/Users/messiah/eclipse-workspace/CSE360HelpSystem/hamcrest-2.2.jar">
+>>>>>>> Stashed changes
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
