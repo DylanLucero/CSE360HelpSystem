@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 
-
 class DatabaseHelper {
 
 	// JDBC driver name and database URL 
@@ -222,10 +221,9 @@ class DatabaseHelper {
 	 * Secondary Database interaction
 	 */
 	
-	public void backup(String filename) throws Exception {
+	public void backup(String filename, String group) throws Exception {
 		//get to string
-		
-		FileRecord fileRecord = createNewFileRecord(filename);
+		FileRecord fileRecord = createNewFileRecord(filename, group);
 		SecondDatabase.storeFileAsBlob(fileRecord);
 		System.out.println("System Sucessfully Backed Up");
 	}
@@ -234,25 +232,48 @@ class DatabaseHelper {
  * @param filename
  * @throws Exception
  */
-	public void restore(String filename) throws Exception {
+	public void restore(String filename, boolean merge) throws Exception {
 	    FileRecord fileRecord = SecondDatabase.retrieveFileAsBlob(filename);
 	    // Check if filedata is null 
 	    if (fileRecord == null || fileRecord.getFileData() == null) {
 	        System.out.println("Cannot restore: file data is null.");
 	        return;
 	    }
-	    insertDataFromFileRecord(fileRecord);
-	    System.out.println("Successful Merge");
-	    
+	    	manageDataWrite(fileRecord, merge);
 	}
-	
+
 	/*
 	 * Creates a new instance of FileRecord 
 	 */
-	public FileRecord createNewFileRecord(String filename) throws SQLException{
-		String query = "SELECT * FROM articleList";
-        ResultSet resultSet = statement.executeQuery(query);
-        
+	public FileRecord createNewFileRecord(String filename, String group) throws SQLException{
+		String query;
+		String filedata = "";
+		if (group.equals("None")) {
+			query = "SELECT * FROM articleList";
+			filedata = extract(query, "None");
+		}
+		else {
+			String[] parsed_group = group.split(", ");
+			for (String groupName : parsed_group) {
+				query = "SELECT * FROM articleList WHERE group = ?";
+				filedata = extract(query, groupName) + filedata;
+			}
+		}
+		FileRecord fileRecord = new FileRecord(filename, filedata);
+		return fileRecord;
+		
+	}
+	
+	public String extract(String query, String groupName) throws SQLException {
+		PreparedStatement preparedStatement = connection.prepareStatement(query);
+		preparedStatement.setString(2, groupName);
+
+		if(groupName.equals("None")) {
+			 preparedStatement = connection.prepareStatement(query);
+	    }
+		
+		ResultSet resultSet = preparedStatement.executeQuery();
+
 		StringBuilder sb = new StringBuilder();
         
         // Convert ResultSet to a String
@@ -265,22 +286,28 @@ class DatabaseHelper {
               .append("Body: ").append(resultSet.getString("body")).append(", ")
               .append("References: ").append(resultSet.getString("references")).append("\n");
         }
-        
         // Compress the string data
         String filedata = sb.toString();
-		FileRecord fileRecord = new FileRecord(filename, filedata);
-		return fileRecord;
-		
+        return filedata;
 	}
 	
-	public void insertDataFromFileRecord(FileRecord myFile) throws IOException, SQLException {
+	public void manageDataWrite(FileRecord myFile, boolean merge) throws IOException, SQLException {
 	    // Convert byte array to String using UTF-8 encoding
 	    // Clear the table
+	if (merge) {
+
+		System.out.print("Merging data");
+
+        // Prepare SQL statement
+        String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+        dataWrite(insertSQL, myFile);
+		
+	}
+	else {
 	    String truncateSQL = "TRUNCATE TABLE articleList"; //truncating table data
 	    try (Statement statement = connection.createStatement()) {
 	        statement.executeUpdate(truncateSQL);
 	    }
-		
 		String dataString = new String(myFile.getFileData());
 	    
 	    // Split the data into lines
@@ -288,7 +315,17 @@ class DatabaseHelper {
 
         // Prepare SQL statement
         String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+
+	}
+	
+	}
+	public void dataWrite(String query, FileRecord myFile) throws SQLException {
+		String dataString = new String(myFile.getFileData());
+	    
+	    // Split the data into lines
+	    String[] lines = dataString.split("\n");
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (String line : lines) {
                 // Split each line into fields (assuming CSV format)
                 String[] fields = line.split(", ");
@@ -308,7 +345,8 @@ class DatabaseHelper {
                 }
             }
         }
-    }
+		
+	}
 	public void closeConnection() {
 		try{ 
 			if(statement!=null) statement.close(); 
