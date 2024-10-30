@@ -1,6 +1,5 @@
 package cse360helpsystem;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 
 
@@ -24,10 +23,9 @@ class DatabaseHelper {
 			System.out.println("Connecting to database...");
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
-			//Re-enable this if you want to get rid of everything in database.
-			//dropTable("cse360users");
-			createTableUsers();  // Create the necessary tables if they don't exist
-			createTableArticles();
+			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
+			createTableUsers();
+			createTableArticles();// Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
@@ -184,7 +182,7 @@ class DatabaseHelper {
 		}
 	}
 	public boolean setupComplete(String username) throws SQLException {
-		boolean updateResult = false;
+		boolean updateResult = true;
 		String query = "SELECT is_setup_complete FROM cse360users WHERE username = ?";
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 	        pstmt.setString(1, username);

@@ -10,6 +10,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -27,7 +28,7 @@ public class Main extends Application {
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc, restoreSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -42,6 +43,7 @@ public class Main extends Application {
 		// Needs if-else that checks if database is empty. If database is empty, we create an admin else we go to the normal login page.
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
+			databaseHelper.connectToSecondaryDatabase();
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
 				window.setScene(establishAdminWindow());
@@ -75,31 +77,44 @@ public class Main extends Application {
 				passText.clear();
 				return;
 		    }
-
+				
+			// Boolean that checks whether login was successful or not
+			// Also redirects to finishSetupWindow if setup isn't completely done by now or else just goes to the specific window
 		    try {
-		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
+		        boolean loginSuccessStudent = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
 		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
+		        boolean loginSuccessInstructor = databaseHelper.login(userText.getText(), passText.getText(), "Instructor");
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
+		        if(!databaseHelper.setupComplete(userText.getText())) {
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } else if (loginSuccess) {
-		            System.out.println("Login Success Student/Instructor");
-		        } 
+		        	}
+		        	else {
+							window.setScene(adminWindow());
+		        	}
+		        } else if (loginSuccessStudent) {
+		            System.out.println("Login Success Student");
+		          if(!databaseHelper.setupComplete(userText.getText())) {
+			            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+			        	} else {
+			        		window.setScene(studentWindow());	
+			        	}
+		        }
+		        else if(loginSuccessInstructor) {
+		            System.out.println("Login Success Instructor");
+		            if(!databaseHelper.setupComplete(userText.getText())) {
+			            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+			        	} else {
+			        		window.setScene(instructorWindow());	
+			        	}
+		        }
 		        else {
 		        	a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
 			        return;
 		        }
-		            if (!databaseHelper.setupComplete(userText.getText())) {
-		                System.out.println("Account setup incomplete, moving to setup page.");
-		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } else
-		        {
-			        a.setAlertType(AlertType.ERROR);
-			        a.setContentText("Login error try again.");
-			        a.show();
-		        }
+		        
 		        
 		    } catch (SQLException ex) {
 		        ex.printStackTrace();
@@ -108,9 +123,6 @@ public class Main extends Application {
 		        a.show();
 		    }
 		    
-		    
-			
-			
 			System.out.println("Username: " + userText.getText());
 			System.out.println("Password: " + passText.getText());
 			
@@ -159,13 +171,6 @@ public class Main extends Application {
 		Label label = new Label("Student Page");
 		
 		Button logout = new Button("Logout");
-		Button viewArticle = new Button("View Article");
-
-		
-		Label articleTitle = new Label("Article Title");
-		Text articleText = new Text("This is an article");
-
-
 		
 		TextField createTitle = new TextField();
 		createTitle.setPromptText("Enter Title");
@@ -177,20 +182,6 @@ public class Main extends Application {
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
 		});
-		
-		//Create Article
-		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.NONE);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,2,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
-		});
 
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
@@ -198,7 +189,6 @@ public class Main extends Application {
 		// Adding to Grid
 		gPane.add(label, 1,0,1,1);
 		gPane.add(logout,1,2,1,1);
-		gPane.add(viewArticle, 1,1,1,1);
 		gPane.setVgap(10);
 		
 		studentSc = new Scene(gPane, 640, 480);
@@ -228,7 +218,6 @@ public class Main extends Application {
 		Button backup = new Button("Backup");
 		Button removeAll = new Button("Remove All");
 		Button mergeAll = new Button("Merge All");
-		Button okArticle = new Button("OK");
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
@@ -241,6 +230,22 @@ public class Main extends Application {
 		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
+		});
+		
+		
+		removeArticle.setOnAction(e->{
+			// Enter Article ID
+			window.setScene(removeArticleWindow());
+		});
+		
+		updateArticle.setOnAction(e->{
+			// Enter Article ID
+			window.setScene(updateArticleWindow());
+		});
+		
+		
+		createArticle.setOnAction(e->{
+			window.setScene(createArticleWindow());
 		});
 		
 		// For Viewing the article, creates a pop up
@@ -256,29 +261,7 @@ public class Main extends Application {
             articleStage.setScene(dialogScene);
             articleStage.show();
 		});
-		
-		removeArticle.setOnAction(e->{
-			
-		});
-		
-		updateArticle.setOnAction(e->{
-			
-		});
-		
-		//Creating an article
-		createArticle.setOnAction(e->{
-			final Stage creatingArticle = new Stage();
-			creatingArticle.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(createTitle,1,1, 1, 1);
-            article.add(createBody,1,3,2,4);
-            article.add(okArticle, 1,4,1,1);
-            
-            Scene articleScene = new Scene(article, 300, 200);
-            creatingArticle.setScene(articleScene);
-            creatingArticle.show();
-		});
+
 		
 		
 		// Opens pop up Dialog so they user can select to restore or backup
@@ -342,11 +325,7 @@ public class Main extends Application {
 		Label articleTitle = new Label("Article Title");
 
 		TextField otp = new TextField();
-		TextField createTitle = new TextField();
-		createTitle.setPromptText("Enter Title");
-		TextField createBody = new TextField();
-		createBody.setPromptText("Enter Article");
-		
+
 		Button restore = new Button("Restore");
 		Button backup = new Button("Backup");
 		Button inviteUser = new Button("Invite User");
@@ -355,20 +334,18 @@ public class Main extends Application {
 		Button listUsers = new Button("List Known Users");
 		Button addRemoveRoles = new Button("Add/Remove Roles");
 		Button logout = new Button("Logout");
-		Button removeAll = new Button("Remove All");
-		Button mergeAll = new Button("Merge All");
 		Button listArticles = new Button("List Article");
 		Button viewArticle = new Button("View Article");
 		Button createArticle = new Button("Create Article");
 		Button updateArticle = new Button("Update Article");
 		Button removeArticle = new Button("Remove Article");
-		Button okArticle = new Button("OK");
 		
-		
-		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
 
-		
+		updateArticle.setOnAction(e->{
+			// Enter Article ID
+			window.setScene(updateArticleWindow());
+		});
 		// Button Functions
 		//Logout
 		logout.setOnAction(e->{
@@ -408,28 +385,15 @@ public class Main extends Application {
 		//----------------- Article Functions----------------------
 		//Create Article
 		createArticle.setOnAction(e->{
-			final Stage creatingArticle = new Stage();
-			creatingArticle.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(createTitle,1,1, 1, 1);
-            article.add(createBody,1,3,2,4);
-            article.add(okArticle, 1,4,1,1);
-            
-            Scene articleScene = new Scene(article, 300, 200);
-            creatingArticle.setScene(articleScene);
-            creatingArticle.show();
+			window.setScene(createArticleWindow());
 		});
 		
-		//Removing an article
+		//Removing an Article
 		removeArticle.setOnAction(e->{
-			
+			// Enter Article ID
+			window.setScene(removeArticleWindow());
 		});
-		
-		//Updating an article
-		updateArticle.setOnAction(e->{
-			
-		});
+
 		
 		// View Article
 		viewArticle.setOnAction(e->{
@@ -445,23 +409,12 @@ public class Main extends Application {
             articleStage.show();
 		});
 		
-
+		
 		
 		// Restore Button
 		//Opens a pop up window, add logic for removeAll and mergeAll Buttons
 		restore.setOnAction(e->{
-			final Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            GridPane dialog = new GridPane();
-            
-            dialog.add(text,1,1, 1, 1);
-            dialog.add(removeAll,1,3,1,1);
-            dialog.add(mergeAll,1,4,1,1);
-            
-            
-            Scene dialogScene = new Scene(dialog, 300, 200);
-            dialogStage.setScene(dialogScene);
-            dialogStage.show();
+			window.setScene(restoreWindow());
 		});
 		
 		
@@ -494,8 +447,97 @@ public class Main extends Application {
 		return adminSc;
 	}
 	
+	//UPDATING ARTICLE WINDOW
+	public Scene updateArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextArea articleID = new TextArea();
+		articleID.setPromptText("Enter Article ID");
+		articleID.setPrefWidth(400);
+		Button update = new Button("Update");
+		Button cancel = new Button("Cancel");
 	
+		GridPane gPane = new GridPane();
 	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		
+		gPane.add(articleID,1,1,1,1);
+		gPane.add(update,1,2,1,1);
+		gPane.add(cancel,2,2,1,1);
+		
+		updateArticleSc = new Scene(gPane, 640, 480);
+		return updateArticleSc;
+	}
+	//REMOVING ARTICLE WINDOW
+	public Scene removeArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextField articleID = new TextField();
+		articleID.setPromptText("Enter Article ID");
+		articleID.setPrefWidth(400);
+		Button update = new Button("Remove");
+		Button cancel = new Button("Cancel");
+	
+		GridPane gPane = new GridPane();
+	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		
+		gPane.add(articleID,1,1,1,1);
+		gPane.add(update,1,2,1,1);
+		gPane.add(cancel,2,2,1,1);
+		
+		removeArticleSc = new Scene(gPane, 640, 480);
+		return removeArticleSc;
+	}
+	
+	//CREATING AN ARTICLE WINDOW
+	public Scene createArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		Button create = new Button("Create");
+		Button back = new Button("Back");
+		
+		TextField createTitle = new TextField();
+		createTitle.setPromptText("Title");
+		TextArea createBody = new TextArea();
+		createBody.setPromptText("Enter article");
+		createBody.setPrefHeight(400);
+		
+		back.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		
+		
+		createTitle.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(createTitle,1,1,2,1);
+		gPane.add(createBody,1,2,2,1);
+		gPane.add(create,1,3,1,1);
+		gPane.add(back,2,3,1,1);
+		
+		createArticleSc = new Scene(gPane,640,480);
+		return createArticleSc;
+	}
 	
 	/* Establish Account Window
 	 * -----------------------------------
@@ -516,9 +558,6 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
-	
-
-
 		
 		
 		create.setOnAction(e->{
@@ -792,7 +831,41 @@ public class Main extends Application {
 		return setupSc;
 	}
 	
-	
+	public Scene restoreWindow() {
+		Button removeAll = new Button("Remove All");
+		Button mergeAll = new Button("Merge All");
+		Button goBack = new Button("Go Back");
+		
+		Text text = new Text("What would you like to do?");
+		
+		
+		
+		GridPane gPane = new GridPane();
+		
+		
+		// Add logic to remove the thingies
+		removeAll.setOnAction(e->{
+			
+		});
+		
+		
+		// Add logic for merging the thingies
+		mergeAll.setOnAction(e->{
+			
+		});
+		
+		goBack.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		gPane.add(text,1,1,1,1);
+		gPane.add(removeAll,1,2,1,1);
+		gPane.add(mergeAll,2,2,1,1);
+		gPane.add(goBack,3,2,1,1);
+		
+		restoreSc = new Scene(gPane, 640, 480);
+		return restoreSc;
+	}
 
 public static void main(String[] args) {
 	Application.launch(args);
