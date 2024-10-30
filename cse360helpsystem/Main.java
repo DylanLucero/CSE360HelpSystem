@@ -79,7 +79,7 @@ public class Main extends Application {
 		    }
 				
 			// Boolean that checks whether login was successful or not
-			// Also
+			// Also redirects to finishSetupWindow if setup isn't completely done by now or else just goes to the specific window
 		    try {
 		        boolean loginSuccessStudent = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
 		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
