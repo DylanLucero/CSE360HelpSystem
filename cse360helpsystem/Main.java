@@ -77,31 +77,44 @@ public class Main extends Application {
 				passText.clear();
 				return;
 		    }
-
+				
+			// Boolean that checks whether login was successful or not
+			// Also
 		    try {
-		        boolean loginSuccess = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
+		        boolean loginSuccessStudent = databaseHelper.login(userText.getText(), passText.getText(), "Student"); // Replace "role" with the actual role you want to check
 		        boolean loginSuccessAdmin = databaseHelper.adminLogin(userText.getText(), passText.getText(), "Admin");
+		        boolean loginSuccessInstructor = databaseHelper.login(userText.getText(), passText.getText(), "Instructor");
 		        if (loginSuccessAdmin){
 		        	System.out.println("Login Success Admin");
+		        if(!databaseHelper.setupComplete(userText.getText())) {
 		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } else if (loginSuccess) {
-		            System.out.println("Login Success Student/Instructor");
-		        } 
+		        	}
+		        	else {
+							window.setScene(adminWindow());
+		        	}
+		        } else if (loginSuccessStudent) {
+		            System.out.println("Login Success Student");
+		          if(!databaseHelper.setupComplete(userText.getText())) {
+			            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+			        	} else {
+			        		window.setScene(studentWindow());	
+			        	}
+		        }
+		        else if(loginSuccessInstructor) {
+		            System.out.println("Login Success Instructor");
+		            if(!databaseHelper.setupComplete(userText.getText())) {
+			            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
+			        	} else {
+			        		window.setScene(instructorWindow());	
+			        	}
+		        }
 		        else {
 		        	a.setAlertType(AlertType.ERROR);
 			        a.setContentText("Login error try again.");
 			        a.show();
 			        return;
 		        }
-		            if (!databaseHelper.setupComplete(userText.getText())) {
-		                System.out.println("Account setup incomplete, moving to setup page.");
-		            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
-		        } else
-		        {
-			        a.setAlertType(AlertType.ERROR);
-			        a.setContentText("Login error try again.");
-			        a.show();
-		        }
+		        
 		        
 		    } catch (SQLException ex) {
 		        ex.printStackTrace();
