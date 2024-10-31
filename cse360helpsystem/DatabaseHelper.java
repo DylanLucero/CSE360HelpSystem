@@ -1,6 +1,8 @@
 package cse360helpsystem;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Base64;
+
 
 
 class DatabaseHelper {
@@ -213,6 +215,119 @@ class DatabaseHelper {
 				+ ");";
 		statement.execute(createTableSQL); //execute table creation
     }
+    
+	public void register(String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
+		
+		//convert body and title to char arrays for encryption to bytes
+		//we are using the title as the iv 
+
+		
+		//encrypt the body of the article 
+		
+		//prepare sql statement for inserting a new article 
+		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
+			pstmt.setString(0, groupString);
+			pstmt.setString(1, titleString); //set title
+			pstmt.setString(2, authorsString); //set authors
+			pstmt.setString(3, abstractTextString); //set abstract
+			pstmt.setString(4, keywordsString); //set keywords
+			pstmt.setString(5, bodyString); //set encrypted body
+			pstmt.setString(6, referencesString); //set references 
+			pstmt.executeUpdate(); //execute the insert statement 
+		}
+	}
+	public void accessArticle(int ID) throws Exception {
+	    // SQL query to retrieve an article by its ID
+
+		String sql = "SELECT * FROM articleList WHERE id = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)){
+			pstmt.setInt(1, ID);
+		    // Prepare the statement to execute the query
+
+			try (ResultSet rs = pstmt.executeQuery()){
+				if (rs.next()) {
+	                // Retrieve article fields from the result set
+
+					String group = rs.getString("articleGroup");
+					String title = rs.getString("title");
+	                String authors = rs.getString("authors");
+	                String abstractText = rs.getString("abstract");
+	                String keywords = rs.getString("keywords");
+	                String body = rs.getString("body");
+	                String references = rs.getString("references");
+	                
+	                //decrypt data with title as iv 
+	                
+	                // Print the article information in a formatted manner
+
+	                System.out.println("+---------------------+");
+	                System.out.println("|      Article        |");
+	                System.out.println("+---------------------+");
+	                System.out.printf("| Group(s): %-20s |\n", group);
+
+	                System.out.printf("| Title: %-20s |\n", title);
+	                
+	                // Print authors
+	                System.out.printf("| Authors: %-17s |\n", authors);
+	                
+	                // Print abstract
+	                System.out.printf("| Abstract: %-15s |\n", abstractText);
+	                
+	                // Print keywords
+	                System.out.printf("| Keywords: %-14s |\n", keywords);
+	                
+	                // Print body
+	                System.out.println("| Body: ");
+	                System.out.println("| " + body); // Indent each line of the body
+	                
+	                // Print references
+	                System.out.printf("| References: %-13s |\n", references);
+	                
+	                // Print footer
+	                System.out.println("+---------------------+");
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+	public void displayList() throws Exception{
+		String sql = "SELECT * FROM articleList"; 
+		Statement stmt = connection.createStatement(); //create statement 
+		ResultSet rs = stmt.executeQuery(sql);  //execute query to retrieve all articles
+		while(rs.next()) { 
+			// Retrieve by column name 
+			int id  = rs.getInt("id"); //get article ID
+			String  title = rs.getString("title");  //get article title
+			String authors = rs.getString("authors");  //get authors of article  
+		
+			// Display values 
+			System.out.println("ID: " + id); 
+			System.out.println("Title: " + title); 
+			System.out.println("Authors: " + authors); 
+
+		} 
+	}
+	public void deleteArticle(int id) throws Exception {
+	    String sql = "UPDATE articleList SET group = NULL, title = NULL, authors = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setInt(1, id); //set ID for deletion 
+			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 
+			//check if any rows were affected (i.e. if the article was found and deleted)
+			if (rowsAffected > 0) {
+                System.out.println("Article fields set to NULL successfully.");
+            } else {
+                System.out.println("No article found with the given ID.");
+            }
+		} catch (SQLException e) { //debugging check 
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	/*
 	/*
 	 * 
 	 * 
