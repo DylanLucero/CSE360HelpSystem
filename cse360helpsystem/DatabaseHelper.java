@@ -204,7 +204,7 @@ class DatabaseHelper {
 
     private void createTableArticles() throws SQLException {
     	String createTableSQL = "CREATE TABLE IF NOT EXISTS articleList ("
-    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+    			+ "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
     			+ "articleGroup VARCHAR(255), "
 				+ "title VARCHAR(255), " //article title
 				+ "authors VARCHAR(255), " //authors of the article 
@@ -217,7 +217,6 @@ class DatabaseHelper {
     }
     
 	public void register(String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
-		
 		
 		//prepare sql statement for inserting a new article 
 		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
@@ -232,12 +231,12 @@ class DatabaseHelper {
 			pstmt.executeUpdate(); //execute the insert statement 
 		}
 	}
-	public void accessArticle(int ID) throws Exception {
+	public void accessArticle(long ID) throws Exception {
 	    // SQL query to retrieve an article by its ID
 
 		String sql = "SELECT * FROM articleList WHERE id = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)){
-			pstmt.setInt(1, ID);
+			pstmt.setLong(1, ID);
 		    // Prepare the statement to execute the query
 
 			try (ResultSet rs = pstmt.executeQuery()){
@@ -288,6 +287,22 @@ class DatabaseHelper {
 			e.printStackTrace();
 		}
 
+	}
+	public void updateArticle(long id, String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws SQLException {
+	    String updateArticle = "UPDATE articleList SET articleGroup = ?, title = ?, authors = ?, abstract = ?, keywords = ?, body = ?, references = ? WHERE id = ?";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
+	        pstmt.setString(1, groupString); 
+	        pstmt.setString(2, titleString); // Set title
+	        pstmt.setString(3, authorsString); // Set authors
+	        pstmt.setString(4, abstractTextString); // Set abstract
+	        pstmt.setString(5, keywordsString); // Set keywords
+	        pstmt.setString(6, bodyString); // Set body
+	        pstmt.setString(7, referencesString); // Set references
+	        pstmt.setLong(8, id); // Set the ID of the article to update
+	        pstmt.executeUpdate();
+	        
+	}
 	}
 	public void displayList(String group) throws Exception{
 		String sql = "";
@@ -350,10 +365,10 @@ class DatabaseHelper {
 		return fileRecord;
 		
 	}
-	public void deleteArticle(int id) throws Exception {
+	public void deleteArticle(long id) throws Exception {
 	    String sql = "UPDATE articleList SET group = NULL, title = NULL, authors = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setInt(1, id); //set ID for deletion 
+			pstmt.setLong(1, id); //set ID for deletion 
 			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 
 			//check if any rows were affected (i.e. if the article was found and deleted)
 			if (rowsAffected > 0) {

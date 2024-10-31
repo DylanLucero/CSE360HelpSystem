@@ -465,6 +465,17 @@ public class Main extends Application {
             	firstSelection.setValue(false);
             }
         });
+		update.setOnAction(event ->{
+	        String idText = articleID.getText();
+	        try {
+	        	long id = Long.parseLong(idText);
+	        	//NEEDAS TO SEND TO AN ARTICLE EDIT SCENE 
+	        	articleID.clear();
+	        } catch (NumberFormatException e) {
+	            System.out.println("Invalid Article ID. Please enter a valid number.");
+	        }
+
+		});
 		
 		
 		gPane.add(articleID,1,1,1,1);
@@ -481,7 +492,7 @@ public class Main extends Application {
 		TextField articleID = new TextField();
 		articleID.setPromptText("Enter Article ID");
 		articleID.setPrefWidth(400);
-		Button update = new Button("Remove");
+		Button remove = new Button("Remove");
 		Button cancel = new Button("Cancel");
 	
 		GridPane gPane = new GridPane();
@@ -493,9 +504,23 @@ public class Main extends Application {
             }
         });
 		
+		remove.setOnAction(event ->{
+	        String idText = articleID.getText();
+	        try {
+	        	long id = Long.parseLong(idText);
+	        	databaseHelper.deleteArticle(id);
+	        	articleID.clear();
+	        } catch (NumberFormatException e) {
+	            System.out.println("Invalid Article ID. Please enter a valid number.");
+	        } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		});
 		
 		gPane.add(articleID,1,1,1,1);
-		gPane.add(update,1,2,1,1);
+		gPane.add(remove,1,2,1,1);
 		gPane.add(cancel,2,2,1,1);
 		
 		removeArticleSc = new Scene(gPane, 640, 480);
