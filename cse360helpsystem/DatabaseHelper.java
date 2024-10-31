@@ -205,8 +205,9 @@ class DatabaseHelper {
     private void createTableArticles() throws SQLException {
     	String createTableSQL = "CREATE TABLE IF NOT EXISTS articleList ("
     			+ "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
-    			+ "articleGroup VARCHAR(255), "
-				+ "title VARCHAR(255), " //article title
+    			+ "articleGroup VARCHAR(255), " 
+				+ "title VARCHAR(255)," //title of the article
+				+ "header VARCHAR(255), " //header of the article
 				+ "authors VARCHAR(255), " //authors of the article 
 				+ "abstract VARCHAR(255), " //abstract of the article 
 				+ "keywords VARCHAR(255), " //keywords related to the article
@@ -216,18 +217,19 @@ class DatabaseHelper {
 		statement.execute(createTableSQL); //execute table creation
     }
     
-	public void register(String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
+	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
 		//prepare sql statement for inserting a new article 
-		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, header, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
-			pstmt.setString(0, groupString);
-			pstmt.setString(1, titleString); //set title
-			pstmt.setString(2, authorsString); //set authors
-			pstmt.setString(3, abstractTextString); //set abstract
-			pstmt.setString(4, keywordsString); //set keywords
-			pstmt.setString(5, bodyString); //set encrypted body
-			pstmt.setString(6, referencesString); //set references 
+			pstmt.setString(1, groupString);
+			pstmt.setString(2, titleString); //set title
+			pstmt.setString(3, authorsString); //set authors
+			pstmt.setString(4, headerString);
+			pstmt.setString(5, abstractTextString); //set abstract
+			pstmt.setString(6, keywordsString); //set keywords
+			pstmt.setString(7, bodyString); //set encrypted body
+			pstmt.setString(8, referencesString); //set references 
 			pstmt.executeUpdate(); //execute the insert statement 
 		}
 	}

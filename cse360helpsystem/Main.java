@@ -547,15 +547,38 @@ public class Main extends Application {
 		
 		TextField createTitle = new TextField();
 		createTitle.setPromptText("Title");
+		TextField createAuthors = new TextField();
+		createAuthors.setPromptText("Authors");
+		TextField createAbstract = new TextField();
+		createAbstract.setPromptText("Abstract");
+		TextField createGroup = new TextField();
+		createGroup.setPromptText("Group");
+		TextField createHeader = new TextField();
+		createHeader.setPromptText("Header");
 		TextArea createBody = new TextArea();
 		createBody.setPromptText("Enter article");
-		createBody.setPrefHeight(400);
+		createBody.setPrefHeight(250);
+		TextField createKeywords = new TextField();
+		createKeywords.setPromptText("Keywords");
+		TextField createReferences = new TextField();
+		createReferences.setPromptText("References");
 		
 		back.setOnAction(e->{
 			window.setScene(adminWindow());
 		});
 		
 		GridPane gPane = new GridPane();
+		
+		create.setOnAction(e->{
+			try {
+				databaseHelper.register(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			window.setScene(adminWindow());
+		});
+		
 		
 		
 		createTitle.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
@@ -567,9 +590,14 @@ public class Main extends Application {
 		
 		gPane.setAlignment(Pos.CENTER);
 		gPane.add(createTitle,1,1,2,1);
-		gPane.add(createBody,1,2,2,1);
-		gPane.add(create,1,3,1,1);
-		gPane.add(back,2,3,1,1);
+		gPane.add(createHeader,1,2,2,1);
+		gPane.add(createBody,1,3,2,1);
+		gPane.add(createAbstract,1,4,2,1);
+		gPane.add(createGroup,1,5,2,1);
+		gPane.add(createKeywords,1,6,2,1);
+		gPane.add(createReferences,2,6,2,1);
+		gPane.add(create,1,7,1,1);
+		gPane.add(back,2,7,1,1);
 		
 		createArticleSc = new Scene(gPane,640,480);
 		return createArticleSc;
