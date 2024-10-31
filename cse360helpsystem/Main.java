@@ -384,6 +384,11 @@ public class Main extends Application {
 		
 		//----------------- Article Functions----------------------
 		//Create Article
+		
+		
+		//?? FIXME!! Needs a list articles function call? 
+		// a backend function exists in databasehelper that intakes an optional group 
+		//NOTE:: if no group is specfied to list please pass in group as "None"
 		createArticle.setOnAction(e->{
 			window.setScene(createArticleWindow());
 		});
@@ -469,7 +474,13 @@ public class Main extends Application {
 	        String idText = articleID.getText();
 	        try {
 	        	long id = Long.parseLong(idText);
-	        	//NEEDAS TO SEND TO AN ARTICLE EDIT SCENE 
+	        	
+	        	
+	        	//
+	        	//NEEDAS TO SEND TO AN ARTICLE EDIT SCENE  FIXME!!!
+	        	//
+	        	
+	        	
 	        	articleID.clear();
 	        } catch (NumberFormatException e) {
 	            System.out.println("Invalid Article ID. Please enter a valid number.");
@@ -867,6 +878,9 @@ public class Main extends Application {
 		
 		GridPane gPane = new GridPane();
 		
+		//FIXME!! need to add drop table logic for this?  
+		
+		
 		
 		// Add logic to remove the thingies
 		removeAll.setOnAction(e->{
@@ -875,6 +889,10 @@ public class Main extends Application {
 		
 		
 		// Add logic for merging the thingies
+		////
+		/// FIXME!! Connect to databaseHelper.restore which takes the filename and a boolean 
+		//value for if it needs to merge or not 
+		///
 		mergeAll.setOnAction(e->{
 			
 		});
