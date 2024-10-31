@@ -218,11 +218,6 @@ class DatabaseHelper {
     
 	public void register(String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
-		//convert body and title to char arrays for encryption to bytes
-		//we are using the title as the iv 
-
-		
-		//encrypt the body of the article 
 		
 		//prepare sql statement for inserting a new article 
 		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
@@ -249,7 +244,7 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String group = rs.getString("articleGroup");
+					String group = rs.getString("group");
 					String title = rs.getString("title");
 	                String authors = rs.getString("authors");
 	                String abstractText = rs.getString("abstract");
@@ -294,9 +289,29 @@ class DatabaseHelper {
 		}
 
 	}
-	public void displayList() throws Exception{
-		String sql = "SELECT * FROM articleList"; 
-		Statement stmt = connection.createStatement(); //create statement 
+	public void displayList(String group) throws Exception{
+		String sql = "";
+		PreparedStatement stmt = null; //create statement 
+		if (group.equals("None")) {
+			sql = "SELECT * FROM articleList"; 
+			stmt = connection.prepareStatement(sql);
+		}
+		else {
+			String[] parsed_group = group.split(", ");
+	        StringBuilder placeholders = new StringBuilder();
+	        for (int i = 0; i < parsed_group.length; i++) {
+	            placeholders.append("?");
+	            if (i < parsed_group.length - 1) {
+	                placeholders.append(", "); // Add a comma for separation
+	            }
+	        }
+	        sql = "SELECT * FROM articleList WHERE `group` IN (" + placeholders.toString() + ")";
+	        stmt = connection.prepareStatement(sql);
+	        for (int i = 0; i < parsed_group.length; i++) {
+	            stmt.setString(i + 1, parsed_group[i]); 
+	        }
+
+		}
 		ResultSet rs = stmt.executeQuery(sql);  //execute query to retrieve all articles
 		while(rs.next()) { 
 			// Retrieve by column name 
@@ -310,6 +325,30 @@ class DatabaseHelper {
 			System.out.println("Authors: " + authors); 
 
 		} 
+	}
+	
+	public FileRecord createNewFileRecord(String filename, String group) throws SQLException{
+		String query;
+		String filedata = "";
+		if (group.equals("None")) {
+			query = "SELECT * FROM articleList";
+			filedata = extract(query, "None");
+		}
+		else {
+			String[] parsed_group = group.split(", ");
+	        StringBuilder placeholders = new StringBuilder();
+	        for (int i = 0; i < parsed_group.length; i++) {
+	            placeholders.append("?");
+	            if (i < parsed_group.length - 1) {
+	                placeholders.append(", "); // Add a comma for separation
+	            }
+	        }
+	        	query = "SELECT * FROM articleList WHERE `group` IN (" + placeholders.toString() + ")";
+				filedata = extract(query, group) + filedata;
+			}
+		FileRecord fileRecord = new FileRecord(filename, filedata);
+		return fileRecord;
+		
 	}
 	public void deleteArticle(int id) throws Exception {
 	    String sql = "UPDATE articleList SET group = NULL, title = NULL, authors = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
@@ -358,24 +397,7 @@ class DatabaseHelper {
 	/*
 	 * Creates a new instance of FileRecord 
 	 */
-	public FileRecord createNewFileRecord(String filename, String group) throws SQLException{
-		String query;
-		String filedata = "";
-		if (group.equals("None")) {
-			query = "SELECT * FROM articleList";
-			filedata = extract(query, "None");
-		}
-		else {
-			String[] parsed_group = group.split(", ");
-			for (String groupName : parsed_group) {
-				query = "SELECT * FROM articleList WHERE group = ?";
-				filedata = extract(query, groupName) + filedata;
-			}
-		}
-		FileRecord fileRecord = new FileRecord(filename, filedata);
-		return fileRecord;
-		
-	}
+
 	
 	public String extract(String query, String groupName) throws SQLException {
 		PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -412,8 +434,6 @@ class DatabaseHelper {
 		System.out.print("Merging data");
 
         // Prepare SQL statement
-        String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
-        dataWrite(insertSQL, myFile);
 		
 	}
 	else {
@@ -421,15 +441,13 @@ class DatabaseHelper {
 	    try (Statement statement = connection.createStatement()) {
 	        statement.executeUpdate(truncateSQL);
 	    }
-		String dataString = new String(myFile.getFileData());
-	    
-	    // Split the data into lines
-	    String[] lines = dataString.split("\n");
 
         // Prepare SQL statement
-        String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
 
 	}
+    String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+    dataWrite(insertSQL, myFile);
+
 	
 	}
 	public void dataWrite(String query, FileRecord myFile) throws SQLException {
