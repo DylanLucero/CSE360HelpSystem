@@ -36,9 +36,7 @@ class SecondDatabase {
     /*
      * This is the another database method
      */
-	public SecondDatabase() throws Exception {
-		
-	}
+
 	/*
 	 * This method connects to database
 	 */

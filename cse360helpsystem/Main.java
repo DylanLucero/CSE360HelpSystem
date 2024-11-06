@@ -25,10 +25,12 @@ public class Main extends Application {
 	
 
 	private static DatabaseHelper databaseHelper = new DatabaseHelper();
+	private static SecondDatabase databaseHelper2 = new SecondDatabase();
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc, restoreSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, 
+					createArticleSc, updateArticleSc, removeArticleSc, restoreSc;
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -43,6 +45,7 @@ public class Main extends Application {
 		// Needs if-else that checks if database is empty. If database is empty, we create an admin else we go to the normal login page.
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
+			databaseHelper2.connectToDatabase();
 			databaseHelper.connectToSecondaryDatabase();
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
@@ -97,7 +100,7 @@ public class Main extends Application {
 		          if(!databaseHelper.setupComplete(userText.getText())) {
 			            window.setScene(finishSetupWindow(userText.getText(), passText.getText()));
 			        	} else {
-			        		window.setScene(studentWindow());	
+			        		window.setScene(instructorWindow());	
 			        	}
 		        }
 		        else if(loginSuccessInstructor) {
@@ -305,11 +308,6 @@ public class Main extends Application {
 		return instructorSc;
 	}
 	
-	
-	
-	
-	
-	
 	/* Admin Window 
 	 * --------------------------------------
 	 * Phase 1 requires
@@ -384,11 +382,6 @@ public class Main extends Application {
 		
 		//----------------- Article Functions----------------------
 		//Create Article
-		
-		
-		//?? FIXME!! Needs a list articles function call? 
-		// a backend function exists in databasehelper that intakes an optional group 
-		//NOTE:: if no group is specfied to list please pass in group as "None"
 		createArticle.setOnAction(e->{
 			window.setScene(createArticleWindow());
 		});
@@ -402,17 +395,13 @@ public class Main extends Application {
 		
 		// View Article
 		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,1,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
-		});
+			try {
+				databaseHelper.accessArticle(1);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}		
+			});
 		
 		
 		
@@ -452,10 +441,8 @@ public class Main extends Application {
 		return adminSc;
 	}
 	
-	//UPDATING ARTICLE WINDOW
-	public Scene updateArticleWindow() {
-		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 
+<<<<<<< Updated upstream
 		TextArea articleID = new TextArea();
 		articleID.setPromptText("Enter Article ID");
 		articleID.setPrefWidth(400);
@@ -602,6 +589,8 @@ public class Main extends Application {
 		createArticleSc = new Scene(gPane,640,480);
 		return createArticleSc;
 	}
+=======
+>>>>>>> Stashed changes
 	
 	/* Establish Account Window
 	 * -----------------------------------
@@ -812,10 +801,8 @@ public class Main extends Application {
 
 	
 	/* Finish Setting Up Account Window
-	 * ---------------------------------------
-	 * 
-	 * 
-	 * */
+	 * ---------------------------------------*/
+
 	public Scene finishSetupWindow(String username, String password){
 		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
 		Label label = new Label("Finish Setting Up Your Account");
@@ -830,12 +817,7 @@ public class Main extends Application {
 		lastName.setPromptText("Last Name");
 		TextField prefName = new TextField();
 		prefName.setPromptText("Prefered Name");
-		/* Continue Button 
-		 * ------------------------
-		 * Add routing to users correct window
-		 * If more than one role redirect to roleWindow()
-		 * */
-		
+
 		advance.setOnAction(e->{
 			
 			if(firstName.getText()=="" || lastName.getText()=="" || prefName.getText()=="") {
@@ -850,18 +832,12 @@ public class Main extends Application {
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}			
-
-			// If role = student, redirect to student
-			// If role = admin, redirect to admin
-			// If role = instructor, redirect to instructor
-			// If multiple roles, redirect to role selection
-			try {
-				if (databaseHelper.login(username, password, "Admin")){
+				} try {
+					if (databaseHelper.login(username, password, "Admin")){
 					window.setScene(adminWindow());
 				}
-				else {
-					window.setScene(studentWindow());
+					else {
+						window.setScene(studentWindow());
 				}
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
@@ -895,6 +871,8 @@ public class Main extends Application {
 		return setupSc;
 	}
 	
+	
+	
 	public Scene restoreWindow() {
 		Button removeAll = new Button("Remove All");
 		Button mergeAll = new Button("Merge All");
@@ -902,27 +880,32 @@ public class Main extends Application {
 		
 		Text text = new Text("What would you like to do?");
 		
-		
+		TextField itemID = new TextField();
 		
 		GridPane gPane = new GridPane();
-		
-		//FIXME!! need to add drop table logic for this?  
-		
 		
 		
 		// Add logic to remove the thingies
 		removeAll.setOnAction(e->{
-			
+			try {
+				databaseHelper.restore(itemID.getText(), false);
+				System.out.println("Successfully Removed");
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		
 		
 		// Add logic for merging the thingies
-		////
-		/// FIXME!! Connect to databaseHelper.restore which takes the filename and a boolean 
-		//value for if it needs to merge or not 
-		///
 		mergeAll.setOnAction(e->{
-			
+			System.out.println("Successfully Merged");
+			try {
+				databaseHelper.restore(itemID.getText(), true);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		
 		goBack.setOnAction(e->{
@@ -936,6 +919,157 @@ public class Main extends Application {
 		
 		restoreSc = new Scene(gPane, 640, 480);
 		return restoreSc;
+	}
+	
+	//UPDATING ARTICLE WINDOW
+	public Scene updateArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextField articleID = new TextField();
+		TextField group = new TextField();
+		TextField title = new TextField();
+
+
+		TextArea articleBody= new TextArea();
+		//articleBody.setPrefHeight(400);
+
+		articleID.setPromptText("Enter Article ID");
+		articleBody.setPromptText("Enter new Body");
+		group.setPromptText("Enter Group");
+		title.setPromptText("Enter Title");
+		Button updateArticle = new Button("Update");
+		Button cancel = new Button("Cancel");
+	
+		GridPane gPane = new GridPane();
+		
+
+	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		updateArticle.setOnAction(e->{
+			try {
+		        String idText = articleID.getText();
+	        	long id = Long.parseLong(idText);
+				databaseHelper.updateArticle(id, group.getText(), title.getText(), articleBody.getText());
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		gPane.add(articleID,3,1,1,1);
+		gPane.add(group,2,1,1,1);
+		gPane.add(title, 1,1,1,1);
+		gPane.add(articleBody, 1,2,1,1);
+		gPane.add(updateArticle,1,3,1,1);
+		gPane.add(cancel,1,4,1,1);
+		
+		updateArticleSc = new Scene(gPane, 640, 480);
+		return updateArticleSc;
+	}
+	//REMOVING ARTICLE WINDOW
+	public Scene removeArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		TextField articleID = new TextField();
+		articleID.setPromptText("Enter Article ID");
+		articleID.setPrefWidth(400);
+		Button remove = new Button("Remove");
+		Button cancel = new Button("Cancel");
+	
+		GridPane gPane = new GridPane();
+		
+		//int ID = Integer.parseInt(articleID.getText());
+		
+	
+		articleID.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		remove.setOnAction(e->{
+			System.out.println("Successfully Deleted");
+			try {
+				//databaseHelper.deleteArticle(ID);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		
+		gPane.add(articleID,1,1,1,1);
+		gPane.add(remove,1,2,1,1);
+		gPane.add(cancel,2,2,1,1);
+		
+		removeArticleSc = new Scene(gPane, 640, 480);
+		return removeArticleSc;
+	}
+	
+	//CREATING AN ARTICLE WINDOW
+	public Scene createArticleWindow() {
+		final SimpleBooleanProperty firstSelection = new SimpleBooleanProperty(true);
+
+		Button create = new Button("Create");
+		Button back = new Button("Back");
+		
+		TextField createTitle = new TextField();
+		TextField group = new TextField();
+		createTitle.setPromptText("Title");
+		group.setPromptText("Group Name");
+		TextArea createBody = new TextArea();
+		createBody.setPromptText("Enter article");
+		createBody.setPrefHeight(400);
+		
+		
+		
+		create.setOnAction(e->{
+			try {
+				databaseHelper.createNewFileRecord(createTitle.getText(), group.getText());
+				System.out.println("Successfully Created");
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		});
+		
+		back.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		
+		
+		createTitle.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
+            if(newValue && firstSelection.get()){
+            	gPane.requestFocus();
+            	firstSelection.setValue(false);
+            }
+        });
+		
+		gPane.setAlignment(Pos.CENTER);
+		gPane.add(createTitle,1,1,1,1);
+		gPane.add(createBody,1,2,2,1);
+		gPane.add(group, 2, 1,1,1);
+		gPane.add(create,1,3,1,1);
+		gPane.add(back,2,3,1,1);
+		
+		createArticleSc = new Scene(gPane,640,480);
+		return createArticleSc;
 	}
 
 public static void main(String[] args) {
