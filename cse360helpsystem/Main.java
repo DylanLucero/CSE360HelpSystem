@@ -903,7 +903,10 @@ public class Main extends Application {
 		TextField articleID = new TextField();
 		TextField group = new TextField();
 		TextField title = new TextField();
-
+		TextField author = new TextField();
+		TextField abstractText = new TextField();
+		TextField keywords = new TextField();
+		TextField references = new TextField();
 
 		TextArea articleBody= new TextArea();
 		//articleBody.setPrefHeight(400);
@@ -912,6 +915,10 @@ public class Main extends Application {
 		articleBody.setPromptText("Enter new Body");
 		group.setPromptText("Enter Group");
 		title.setPromptText("Enter Title");
+		author.setPromptText("Set Author");
+		abstractText.setPromptText("Abstract Text");
+		keywords.setPromptText("Keywords");
+		references.setPromptText("References");
 		Button updateArticle = new Button("Update");
 		Button cancel = new Button("Cancel");
 	
@@ -927,10 +934,19 @@ public class Main extends Application {
         });
 		
 		updateArticle.setOnAction(e->{
+			if(articleID.getText() == "" ||articleBody.getText() == "" || group.getText() == "" || author.getText() == "" || title.getText() == "" ||
+					abstractText.getText() == "" || keywords.getText() == "" || references.getText() == "") 
+			{
+				a.setAlertType(AlertType.WARNING);
+				a.setContentText("Fields left empty.");
+				a.show();
+				return;
+			}
 			try {
 		        String idText = articleID.getText();
 	        	long id = Long.parseLong(idText);
-				databaseHelper.updateArticle(id, group.getText(), title.getText(), articleBody.getText());
+	        	//long id, String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString
+				databaseHelper.updateArticle(id, group.getText(), title.getText(), author.getText(), abstractText.getText(), keywords.getText(), articleBody.getText(), references.getText());
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -944,6 +960,10 @@ public class Main extends Application {
 		gPane.add(articleID,3,1,1,1);
 		gPane.add(group,2,1,1,1);
 		gPane.add(title, 1,1,1,1);
+		gPane.add(author, 3,3,1,1);
+		gPane.add(abstractText,2,3,1,1);
+		gPane.add(keywords, 2,2,1,1);
+		gPane.add(references, 3,2,1,1);
 		gPane.add(articleBody, 1,2,1,1);
 		gPane.add(updateArticle,1,3,1,1);
 		gPane.add(cancel,1,4,1,1);
