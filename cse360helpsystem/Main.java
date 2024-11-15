@@ -960,11 +960,8 @@ public class Main extends Application {
 		gPane.add(articleID,3,1,1,1);
 		gPane.add(group,2,1,1,1);
 		gPane.add(title, 1,1,1,1);
-<<<<<<< HEAD
 		gPane.add(author, 3,3,1,1);
-=======
 		gPane.add(author, 1,2,1,1);
->>>>>>> origin/master
 		gPane.add(abstractText,2,3,1,1);
 		gPane.add(keywords, 2,2,1,1);
 		gPane.add(references, 3,2,1,1);
