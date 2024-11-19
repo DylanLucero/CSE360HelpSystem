@@ -828,6 +828,7 @@ public class Main extends Application {
 		create.setOnAction(e->{
 			try {
 				databaseHelper.register(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
+				System.out.println("Success");
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -982,8 +983,7 @@ public class Main extends Application {
 		return updateArticleSc;
 	}
 	
-	public Scene helpWindow() {
-		
+	public Scene helpWindow() {		
 		Button send = new Button("Send");
 		Button back = new Button("Go Back");
 		
@@ -1045,6 +1045,7 @@ public class Main extends Application {
 		
 		GridPane gPane = new GridPane();
 		
+		
 		gPane.add(select,0,0);
 		gPane.add(prompt, 0, 1);
 		gPane.add(back, 1, 2);
@@ -1057,8 +1058,16 @@ public class Main extends Application {
 	public Scene searchWindow() {
 		TextField search = new TextField("");
 		search.setPromptText("Search");
-		
-		ComboBox level = new ComboBox();
+				
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "Beginner",
+			        "Intermediate",
+			        "Advanced",
+			        "Expert"
+			    );
+			final ComboBox<String> level = new ComboBox<String>(options);
+			level.setPromptText("Level");
 		
 		
 		Button searchButton = new Button("Search");
@@ -1066,6 +1075,7 @@ public class Main extends Application {
 		
 		searchButton.setOnAction(e->{
 			// This will need to be a database query
+			
 		});
 		
 		cancel.setOnAction(e->{
@@ -1083,6 +1093,8 @@ public class Main extends Application {
 		searchSc = new Scene(gPane, 640,480);
 		return searchSc;
 	}
+	
+	
 
 public static void main(String[] args) {
 	Application.launch(args);

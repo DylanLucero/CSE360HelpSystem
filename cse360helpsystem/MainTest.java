@@ -2,7 +2,6 @@ package cse360helpsystem;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-
 import java.sql.SQLException;
 
 public class MainTest {
@@ -43,6 +42,7 @@ public class MainTest {
         assertFalse(dbHelper.doesUserExist(username));
     }
     
+
 
    }
 
