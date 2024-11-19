@@ -26,6 +26,7 @@ class DatabaseHelper {
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
+			dropTable("articleList");
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
@@ -217,22 +218,22 @@ class DatabaseHelper {
 		statement.execute(createTableSQL); //execute table creation
     }
     
-	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
+	public void articleRegister(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
 		//prepare sql statement for inserting a new article 
-		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, header, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		String insertArticle = "INSERT INTO articleList (articleGroup, title, header, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
 			pstmt.setString(1, groupString);
 			pstmt.setString(2, titleString); //set title
-			pstmt.setString(3, authorsString); //set authors
-			pstmt.setString(4, headerString);
+			pstmt.setString(3, headerString);
+			pstmt.setString(4, authorsString); //set authors
 			pstmt.setString(5, abstractTextString); //set abstract
 			pstmt.setString(6, keywordsString); //set keywords
 			pstmt.setString(7, bodyString); //set encrypted body
 			pstmt.setString(8, referencesString); //set references 
 			pstmt.executeUpdate(); //execute the insert statement 
 		}
-	}
+	}		
 	public void accessArticle(long ID) throws Exception {
 	    // SQL query to retrieve an article by its ID
 

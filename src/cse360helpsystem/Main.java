@@ -818,7 +818,7 @@ public class Main extends Application {
 		
 		create.setOnAction(e->{
 			try {
-				databaseHelper.register(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
+				databaseHelper.articleRegister(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
