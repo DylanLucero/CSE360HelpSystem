@@ -52,6 +52,7 @@ public class Main extends Application {
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
 			databaseHelper.connectToSecondaryDatabase();
+			databaseHelper.connectToHelpArticleDatabase();
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
 				window.setScene(establishAdminWindow());
@@ -265,16 +266,12 @@ public class Main extends Application {
 		
 		// For Viewing the article, creates a pop up
 		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.NONE);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,2,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
+			try {
+				databaseHelper.accessArticle(1);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 
 		
@@ -409,19 +406,15 @@ public class Main extends Application {
 		});
 
 		 
-		// View Article - Admin no longer has access to viewing articles
-//		viewArticle.setOnAction(e->{
-//			final Stage articleStage = new Stage();
-//			articleStage.initModality(Modality.APPLICATION_MODAL);
-//            GridPane article = new GridPane();
-//            
-//            article.add(articleTitle,1,1, 1, 1);
-//            article.add(articleText,1,2,1,1);
-//            
-//            Scene dialogScene = new Scene(article, 300, 200);
-//            articleStage.setScene(dialogScene);
-//            articleStage.show();
-//		});
+
+	viewArticle.setOnAction(e->{
+			try {
+				databaseHelper.accessArticle(1);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		
 		
 		

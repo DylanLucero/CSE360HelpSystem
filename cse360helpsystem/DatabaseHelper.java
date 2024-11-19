@@ -27,6 +27,7 @@ class DatabaseHelper {
 			statement = connection.createStatement(); 
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
 			createTableUsers();
+			createHelpArticleTable();
 			createTableArticles();// Create the necessary tables if they don't exist
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
@@ -40,11 +41,19 @@ class DatabaseHelper {
 		SecondDatabase dbHelper = new SecondDatabase();
 		 try {
 		        dbHelper.connectToDatabase(); 
-		        System.out.println("Connecting to database 1");
+		        System.out.println("Connecting to database 2");
 		    } catch (SQLException e) {
 		        e.printStackTrace();
 		    }
 	}
+	
+	public void connectToHelpArticleDatabase() throws Exception {
+		HelpArticleDatabase dbAHelper = new HelpArticleDatabase();
+		dbAHelper.connectToDatabase();
+        System.out.println("Connecting to Help Article Database");
+
+	}
+	
     // Create the cse360users table
     private void createTableUsers() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS cse360users ("
@@ -217,6 +226,16 @@ class DatabaseHelper {
 		statement.execute(createTableSQL); //execute table creation
     }
     
+    private void createHelpArticleTable() throws SQLException{
+    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helpArticleList ("
+    			+ "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+    			+ "articleType VARCHAR(255), " 
+    			+ "articleLevel VARCHAR(255), "
+    			+ "articleBody VARCHAR(255), "
+				+ ");";
+		statement.execute(createTableSQL); //execute table creation
+    }
+    
 	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
 		//prepare sql statement for inserting a new article 
@@ -245,7 +264,7 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String group = rs.getString("group");
+					String group = rs.getString("articleGroup");
 					String title = rs.getString("title");
 	                String authors = rs.getString("authors");
 	                String abstractText = rs.getString("abstract");
