@@ -35,7 +35,6 @@ class SpecialAccess{
 	private void createTableSpecialAccess() {
 		String createSpecialAccessArticlesSQL = "CREATE TABLE if NOT EXISTS specialAccessArticles ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "id BIGINT, " //id of the article in articleList
 				+ "articleGroup VARCHAR(255));)"; 
 	    String createSpecialDecryptedAccessSQL = "CREATE TABLE IF NOT EXISTS specialAccessToDecrypted ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "

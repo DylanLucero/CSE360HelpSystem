@@ -29,6 +29,7 @@ class DatabaseHelper {
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
+			createHelpArticleTable();
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
@@ -48,6 +49,14 @@ class DatabaseHelper {
 		        e.printStackTrace();
 		    }
 	}
+	
+	public void connectToHelpArticleDatabase() throws Exception {
+		HelpArticleDatabase dbAHelper = new HelpArticleDatabase();
+		dbAHelper.connectToDatabase();
+        System.out.println("Connecting to Help Article Database");
+	}
+	
+	
     // Create the cse360users table
     private void createTableUsers() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS cse360users ("
@@ -68,6 +77,21 @@ class DatabaseHelper {
             e.printStackTrace();
         }
     }
+    
+    private void createHelpArticleTable(){
+    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
+    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+    			+ "article_type VARCHAR(50), " 
+    			+ "articlel_level VARCHAR(50), "
+    			+ "article_body VARCHAR(255) UNIQUE; ";
+    	try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
+            System.out.println("Table created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     
     
     // Drop the tables
@@ -249,6 +273,11 @@ class DatabaseHelper {
 			pstmt.executeUpdate(); //execute the insert statement 
 		}
 	}
+	
+	public void createHelpArticle() {
+		
+	}
+	
 	public void accessArticle(long ID) throws Exception {
 	    // SQL query to retrieve an article by its ID
 
