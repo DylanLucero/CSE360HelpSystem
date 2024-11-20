@@ -3,6 +3,8 @@ package cse360helpsystem;
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -16,6 +18,9 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.scene.control.ComboBox;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 
 import java.sql.SQLException;
 
@@ -28,7 +33,10 @@ public class Main extends Application {
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	
-	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, establishSc, establishAdminSc, createArticleSc, updateArticleSc, removeArticleSc, restoreSc;
+	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, 
+			establishSc, establishAdminSc, createArticleSc, updateArticleSc, 
+			removeArticleSc, restoreSc, helpSc, searchSc;
+	
 	public 	Alert a = new Alert(AlertType.NONE);
 
 	
@@ -44,6 +52,7 @@ public class Main extends Application {
 			
 			databaseHelper.connectToDatabase();  // Connect to the database
 			databaseHelper.connectToSecondaryDatabase();
+			databaseHelper.connectToHelpArticleDatabase();
 			if(databaseHelper.isDatabaseEmpty()) {
 				// System.println("Database is empty, creating admin");
 				window.setScene(establishAdminWindow());
@@ -171,16 +180,21 @@ public class Main extends Application {
 		Label label = new Label("Student Page");
 		
 		Button logout = new Button("Logout");
-		
-		TextField createTitle = new TextField();
-		createTitle.setPromptText("Enter Title");
-		TextField createBody = new TextField();
-		createBody.setPromptText("Enter Article");
+		Button help = new Button("Help");
+		Button search = new Button("Search");
 		
 		
 		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
+		});
+		
+		help.setOnAction(e->{
+			window.setScene(helpWindow());
+		});
+		
+		search.setOnAction(e->{
+			window.setScene(searchWindow());
 		});
 
 		GridPane gPane = new GridPane();
@@ -188,7 +202,9 @@ public class Main extends Application {
 		
 		// Adding to Grid
 		gPane.add(label, 1,0,1,1);
-		gPane.add(logout,1,2,1,1);
+		gPane.add(help, 1,1,1,1);
+		gPane.add(search, 1, 2);
+		gPane.add(logout,1,3,1,1);
 		gPane.setVgap(10);
 		
 		studentSc = new Scene(gPane, 640, 480);
@@ -250,16 +266,12 @@ public class Main extends Application {
 		
 		// For Viewing the article, creates a pop up
 		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.NONE);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,2,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
+			try {
+				databaseHelper.accessArticle(1);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 
 		
@@ -340,12 +352,14 @@ public class Main extends Application {
 		Button updateArticle = new Button("Update Article");
 		Button removeArticle = new Button("Remove Article");
 		
-		Text articleText = new Text("This is an article");
-
-		updateArticle.setOnAction(e->{
-			// Enter Article ID
-			window.setScene(updateArticleWindow());
-		});
+		
+		
+		// Admin no longer as the right to edit articles
+		
+//		updateArticle.setOnAction(e->{
+//			// Enter Article ID
+//			window.setScene(updateArticleWindow());
+//		});
 		// Button Functions
 		//Logout
 		logout.setOnAction(e->{
@@ -376,19 +390,11 @@ public class Main extends Application {
 				System.out.println("");
 				databaseHelper.printUsers();
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
 		});
 		
-		//----------------- Article Functions----------------------
-		//Create Article
-		
-		
-		//?? FIXME!! Needs a list articles function call? 
-		// a backend function exists in databasehelper that intakes an optional group 
-		//NOTE:: if no group is specfied to list please pass in group as "None"
 		createArticle.setOnAction(e->{
 			window.setScene(createArticleWindow());
 		});
@@ -399,19 +405,15 @@ public class Main extends Application {
 			window.setScene(removeArticleWindow());
 		});
 
-		
-		// View Article
-		viewArticle.setOnAction(e->{
-			final Stage articleStage = new Stage();
-			articleStage.initModality(Modality.APPLICATION_MODAL);
-            GridPane article = new GridPane();
-            
-            article.add(articleTitle,1,1, 1, 1);
-            article.add(articleText,1,2,1,1);
-            
-            Scene dialogScene = new Scene(article, 300, 200);
-            articleStage.setScene(dialogScene);
-            articleStage.show();
+		 
+
+	viewArticle.setOnAction(e->{
+			try {
+				databaseHelper.accessArticle(1);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		
 		
@@ -818,7 +820,8 @@ public class Main extends Application {
 		
 		create.setOnAction(e->{
 			try {
-				databaseHelper.articleRegister(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
+				databaseHelper.register(createGroup.getText(), createTitle.getText(),createHeader.getText(), createAuthors.getText(), createAbstract.getText(), createKeywords.getText(), createBody.getText(), createReferences.getText());
+				System.out.println("Success");
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -972,6 +975,119 @@ public class Main extends Application {
 		updateArticleSc = new Scene(gPane, 640, 480);
 		return updateArticleSc;
 	}
+	
+	public Scene helpWindow() {		
+		Button send = new Button("Send");
+		Button back = new Button("Go Back");
+		
+		TextArea prompt = new TextArea();
+		prompt.setPromptText("Enter your question");
+		
+	
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "Generic",
+			        "Specific"
+			    );
+			final ComboBox<String> select = new ComboBox<String>(options);
+			select.setPromptText("Question Type");
+			
+
+	        send.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent e) {
+	                if (select.getValue().toString() == "Generic" && 
+	                    !select.getValue().toString().isEmpty()){
+	                	if(prompt.getText() == null || prompt.getText() == "") {
+	                		a.setAlertType(AlertType.WARNING);
+	                		a.setContentText("Body Left Blank!");
+	                		a.show();
+	                		return;
+	                	}
+	                        System.out.println("Your message was successfully sent");   
+	                        a.setAlertType(AlertType.INFORMATION);
+	                        a.setContentText("Message Sent Successfully");
+	                        a.show();
+	                        prompt.clear();
+//	                        text.clear();
+	                }
+	                if(select.getValue().toString() == "Specific" && 
+		                    !select.getValue().toString().isEmpty()){
+		                	if(prompt.getText() == null || prompt.getText() == "") {
+		                		a.setAlertType(AlertType.WARNING);
+		                		a.setContentText("Body Left Blank!");
+		                		a.show();
+		                		return;
+		                	}
+		                        System.out.println("Your message was successfully sent");   
+		                        a.setAlertType(AlertType.INFORMATION);
+		                        a.setContentText("Message Sent Successfully");
+		                        a.show();
+		                        prompt.clear();
+	                }
+	                else {
+	                    System.out.println("You have not selected a recipient!"); 
+	                }
+	            }
+	        });
+	        
+	        back.setOnAction(e->{
+	        	window.setScene(studentSc);
+	        });
+			
+		
+		GridPane gPane = new GridPane();
+		
+		
+		gPane.add(select,0,0);
+		gPane.add(prompt, 0, 1);
+		gPane.add(back, 1, 2);
+		gPane.add(send, 2, 2);
+		
+		helpSc = new Scene(gPane, 640,480);
+		return helpSc;
+	}
+	
+	public Scene searchWindow() {
+		TextField search = new TextField("");
+		search.setPromptText("Search");
+				
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "Beginner",
+			        "Intermediate",
+			        "Advanced",
+			        "Expert"
+			    );
+			final ComboBox<String> level = new ComboBox<String>(options);
+			level.setPromptText("Level");
+		
+		
+		Button searchButton = new Button("Search");
+		Button cancel = new Button("Cancel");
+		
+		searchButton.setOnAction(e->{
+			// This will need to be a database query
+			
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(studentWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		
+		gPane.add(search, 1, 0);
+		gPane.add(searchButton, 2, 1);
+		gPane.add(level, 0, 0);
+		gPane.add(cancel, 1,1);
+		
+		searchSc = new Scene(gPane, 640,480);
+		return searchSc;
+	}
+	
+	
 
 public static void main(String[] args) {
 	Application.launch(args);

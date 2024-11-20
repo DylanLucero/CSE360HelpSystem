@@ -16,10 +16,9 @@ public class OTP{
 			stringOTP = Integer.toString(userOTP);
 		}
 		return stringOTP;
-	}
-
-
-
+	} 
 
 }
+
+
 	
