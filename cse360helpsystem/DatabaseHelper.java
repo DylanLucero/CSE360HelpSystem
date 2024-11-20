@@ -526,7 +526,7 @@ private EncryptionHelper encryptionHelper;
         // Prepare SQL statement
 
 	}
-    String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+    String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?)";
     dataWrite(insertSQL, myFile);
 
 	

@@ -277,7 +277,7 @@ public class Main extends Application {
 		// For Viewing the article, creates a pop up
 		viewArticle.setOnAction(e->{
 			try {
-				databaseHelper.accessArticle(1);
+				databaseHelper.accessArticle(2);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -344,12 +344,13 @@ public class Main extends Application {
 	*/
 	public Scene adminWindow(){
 		Label label = new Label("Admin Page");
-		Label articleTitle = new Label("Article Title");
 
 		TextField otp = new TextField();
 
 		Button restore = new Button("Restore");
 		Button backup = new Button("Backup");
+		Button backupHelp = new Button("Backup Help Article");
+		Button restoreHelp = new Button("Restore Help Article");
 		Button inviteUser = new Button("Invite User");
 		Button resetUser = new Button("Reset User Account");
 		Button deleteUser = new Button("Delete User Account");
@@ -361,6 +362,7 @@ public class Main extends Application {
 		Button createArticle = new Button("Create Article");
 		Button updateArticle = new Button("Update Article");
 		Button removeArticle = new Button("Remove Article");
+		Button removeHelpArticle = new Button("Remove Help Article");
 		
 		
 		
@@ -458,6 +460,11 @@ public class Main extends Application {
 		gPane.add(backup,1,7,2,1);
 		gPane.add(restore,1,8,2,1);
 		gPane.add(logout,1,9,2,1);
+		
+		// Help Srticle Buttons
+		gPane.add(removeHelpArticle, 0, 3);
+		gPane.add(backupHelp, 0, 4);
+		gPane.add(restoreHelp, 0, 5);
 		gPane.setVgap(10);
 
 		adminSc = new Scene(gPane, 640, 480);
@@ -789,6 +796,10 @@ public class Main extends Application {
 
 		});
 		
+		cancel.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
 		gPane.add(articleID,1,1,1,1);
 		gPane.add(remove,1,2,1,1);
 		gPane.add(cancel,2,2,1,1);
@@ -854,8 +865,9 @@ public class Main extends Application {
 		gPane.add(createBody,1,3,2,1);
 		gPane.add(createAbstract,1,4,2,1);
 		gPane.add(createGroup,1,5,2,1);
-		gPane.add(createKeywords,1,6,2,1);
-		gPane.add(createReferences,2,6,2,1);
+		gPane.add(createKeywords,1,6,1,1);
+		gPane.add(createAuthors, 2, 6);
+		gPane.add(createReferences,3,6,1,1);
 		gPane.add(create,1,7,1,1);
 		gPane.add(back,2,7,1,1);
 		
