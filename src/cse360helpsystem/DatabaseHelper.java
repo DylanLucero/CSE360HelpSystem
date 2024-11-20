@@ -17,6 +17,7 @@ class DatabaseHelper {
 
 	private Connection connection = null;
 	private Statement statement = null; 
+	
 	//	PreparedStatement pstmt
 
 	public void connectToDatabase() throws SQLException {
@@ -38,9 +39,11 @@ class DatabaseHelper {
 	 */
 	public void connectToSecondaryDatabase() throws Exception{
 		SecondDatabase dbHelper = new SecondDatabase();
+		SpecialAccess specialAccess = new SpecialAccess();
 		 try {
 		        dbHelper.connectToDatabase(); 
-		        System.out.println("Connecting to database 1");
+	            specialAccess.connectToSpecialAccessDatabase();
+		        System.out.println("Connecting to databases 2 and 3");
 		    } catch (SQLException e) {
 		        e.printStackTrace();
 		    }
@@ -114,10 +117,15 @@ class DatabaseHelper {
 			pstmt.setString(2, password);
 			pstmt.setString(3, role);
 			try (ResultSet rs = pstmt.executeQuery()) {
+				//if this logic succeeds, load their access info
+				if (rs.next()){
+					loadUserAccess(username);
+				}
 				return rs.next();
 			}
 		}
 	}
+	
 	public boolean adminLogin(String username, String password, String role) throws SQLException {
 		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -196,6 +204,14 @@ class DatabaseHelper {
 	        }
         	return updateResult;
 	    }
+	}
+	
+	/*
+	 * All things to do with access checking! WOW this is so fun
+	 */
+	
+	public static void loadUserAccess(String user) {
+		
 	}
 	
 /*
@@ -368,7 +384,7 @@ class DatabaseHelper {
 		
 	}
 	public void deleteArticle(long id) throws Exception {
-	    String sql = "UPDATE articleList SET group = NULL, title = NULL, authors = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
+	    String sql = "UPDATE articleList SET articleGroup = NULL, title = NULL, authors = NULL, header = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setLong(1, id); //set ID for deletion 
 			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 
