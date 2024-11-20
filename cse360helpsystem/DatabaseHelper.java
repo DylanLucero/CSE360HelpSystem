@@ -291,7 +291,7 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String group = rs.getString("group");
+					String group = rs.getString("articleGroup");
 					String title = rs.getString("title");
 	                String authors = rs.getString("authors");
 	                String abstractText = rs.getString("abstract");
@@ -508,7 +508,7 @@ class DatabaseHelper {
         // Prepare SQL statement
 
 	}
-    String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?)";
+    String insertSQL = "INSERT INTO articleList (articleGroup, title, authors, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?)";
     dataWrite(insertSQL, myFile);
 
 	
