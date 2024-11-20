@@ -27,6 +27,7 @@ class DatabaseHelper {
 			connection = DriverManager.getConnection(DB_URL, USER, PASS);
 			statement = connection.createStatement(); 
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
+			dropTable("articleList");
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
 			createHelpArticleTable();
@@ -265,8 +266,8 @@ class DatabaseHelper {
 		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
 			pstmt.setString(1, groupString);
 			pstmt.setString(2, titleString); //set title
-			pstmt.setString(3, authorsString); //set authors
-			pstmt.setString(4, headerString);
+			pstmt.setString(3, headerString);
+			pstmt.setString(4, authorsString); //set authors
 			pstmt.setString(5, abstractTextString); //set abstract
 			pstmt.setString(6, keywordsString); //set keywords
 			pstmt.setString(7, bodyString); //set encrypted body
