@@ -261,31 +261,20 @@ class DatabaseHelper {
 		statement.execute(createTableSQL); //execute table creation
     }
     
- /**********************************************
-     private void createHelpArticleTable(){
-    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
-    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-    			+ "article_type VARCHAR(50), " 
-    			+ "article_level VARCHAR(50), "
-    			+ "article_body VARCHAR(255) UNIQUE; ";
-    	try (Statement stmt = connection.createStatement()) {
-            stmt.execute(createTableSQL);
-            System.out.println("Table created successfully.");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
- */****************************************************************   
-    
- 	//create new article
-	public void register(String articleType, String articleLevel, String articleBody) throws Exception {
+	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
+		
 		//prepare sql statement for inserting a new article 
-		String insertArticle = "INSERT INTO helparticletable (article_type, article_level, article_body) VALUES (?,?,?)";
+		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, header, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
-			pstmt.setString(1, articleType); 
-			pstmt.setString(2, articleLevel); 
-			pstmt.setString(3, articleBody);
+			pstmt.setString(1, groupString);
+			pstmt.setString(2, titleString); //set title
+			pstmt.setString(3, headerString);
+			pstmt.setString(4, authorsString); //set authors
+			pstmt.setString(5, abstractTextString); //set abstract
+			pstmt.setString(6, keywordsString); //set keywords
+			pstmt.setString(7, bodyString); //set encrypted body
+			pstmt.setString(8, referencesString); //set references 
+			pstmt.executeUpdate(); //execute the insert statement 
 		}
 	}
 	
@@ -293,11 +282,10 @@ class DatabaseHelper {
 		
 	}
 	
-	//access article using ID
 	public void accessArticle(long ID) throws Exception {
 	    // SQL query to retrieve an article by its ID
 
-		String sql = "SELECT * FROM helparticletable WHERE id = ?";
+		String sql = "SELECT * FROM articleList WHERE id = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)){
 			pstmt.setLong(1, ID);
 		    // Prepare the statement to execute the query
@@ -306,9 +294,13 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String type = rs.getString("article_type");
-					String level = rs.getString("article_level");
-	                String body = rs.getString("article_body");
+					String group = rs.getString("articleGroup");
+					String title = rs.getString("title");
+	                String authors = rs.getString("authors");
+	                String abstractText = rs.getString("abstract");
+	                String keywords = rs.getString("keywords");
+	                String body = rs.getString("body");
+	                String references = rs.getString("references");
 	                
 	                //decrypt data with title as iv 
 	                
@@ -317,12 +309,27 @@ class DatabaseHelper {
 	                System.out.println("+---------------------+");
 	                System.out.println("|      Article        |");
 	                System.out.println("+---------------------+");
-	                System.out.printf("| Type: %-20s |\n", type);
+	                System.out.printf("| Group(s): %-20s |\n", group);
 
-	                System.out.printf("| Level: %-20s |\n", level);            
+	                System.out.printf("| Title: %-20s |\n", title);
+	                
+	                // Print authors
+	                System.out.printf("| Authors: %-17s |\n", authors);
+	                
+	                // Print abstract
+	                System.out.printf("| Abstract: %-15s |\n", abstractText);
+	                
+	                // Print keywords
+	                System.out.printf("| Keywords: %-14s |\n", keywords);
+	                
 	                // Print body
 	                System.out.println("| Body: ");
 	                System.out.println("| " + body); // Indent each line of the body
+	                
+	                // Print references
+	                System.out.printf("| References: %-13s |\n", references);
+	                
+	                // Print footer
 	                System.out.println("+---------------------+");
 				}
 			}
@@ -332,26 +339,27 @@ class DatabaseHelper {
 		}
 
 	}
-	
-	//modify record
-	public void updateArticle(String articleType, String articleLevel, String articleBody) throws SQLException {
-	    String updateArticle = "UPDATE helparticletable (article_type, article_level, article_body) VALUES (?,?,?)";
+	public void updateArticle(long id, String groupString, String titleString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws SQLException {
+	    String updateArticle = "UPDATE articleList SET articleGroup = ?, title = ?, authors = ?, abstract = ?, keywords = ?, body = ?, references = ? WHERE id = ?";
 	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
-	        pstmt.setString(1, articleType); 
-	        pstmt.setString(2, articleLevel); // Set title
-	        pstmt.setString(3, articleBody); // Set authors
+	        pstmt.setString(1, groupString); 
+	        pstmt.setString(2, titleString); // Set title
+	        pstmt.setString(3, authorsString); // Set authors
+	        pstmt.setString(4, abstractTextString); // Set abstract
+	        pstmt.setString(5, keywordsString); // Set keywords
+	        pstmt.setString(6, bodyString); // Set body
+	        pstmt.setString(7, referencesString); // Set references
+	        pstmt.setLong(8, id); // Set the ID of the article to update
 	        pstmt.executeUpdate();
 	        
-	    }
 	}
-	
-	//display article WIP
+	}
 	public void displayList(String group) throws Exception{
 		String sql = "";
 		PreparedStatement stmt = null; //create statement 
 		if (group.equals("None")) {
-			sql = "SELECT * FROM helparticletable"; 
+			sql = "SELECT * FROM articleList"; 
 			stmt = connection.prepareStatement(sql);
 		}
 		else {
@@ -363,7 +371,7 @@ class DatabaseHelper {
 	                placeholders.append(", "); // Add a comma for separation
 	            }
 	        }
-	        sql = "SELECT * FROM helparticletable WHERE `group` IN (" + placeholders.toString() + ")";
+	        sql = "SELECT * FROM articleList WHERE `group` IN (" + placeholders.toString() + ")";
 	        stmt = connection.prepareStatement(sql);
 	        for (int i = 0; i < parsed_group.length; i++) {
 	            stmt.setString(i + 1, parsed_group[i]); 
@@ -385,12 +393,11 @@ class DatabaseHelper {
 		} 
 	}
 	
-	//create blob WIP
 	public FileRecord createNewFileRecord(String filename, String group) throws SQLException{
 		String query;
 		String filedata = "";
 		if (group.equals("None")) {
-			query = "SELECT * FROM helparticletable";
+			query = "SELECT * FROM articleList";
 			filedata = extract(query, "None");
 		}
 		else {
@@ -402,17 +409,15 @@ class DatabaseHelper {
 	                placeholders.append(", "); // Add a comma for separation
 	            }
 	        }
-	        	query = "SELECT * FROM helparticletable WHERE `group` IN (" + placeholders.toString() + ")";
+	        	query = "SELECT * FROM articleList WHERE `group` IN (" + placeholders.toString() + ")";
 				filedata = extract(query, group) + filedata;
 			}
 		FileRecord fileRecord = new FileRecord(filename, filedata);
 		return fileRecord;
 		
 	}
-	
-	//delete article
 	public void deleteArticle(long id) throws Exception {
-	    String sql = "DELETE FROM helparticletable WHERE id = ?"; // SQL update statement
+	    String sql = "UPDATE articleList SET articleGroup = NULL, title = NULL, authors = NULL, header = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setLong(1, id); //set ID for deletion 
 			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 

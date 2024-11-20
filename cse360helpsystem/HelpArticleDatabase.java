@@ -138,7 +138,7 @@ class HelpArticleDatabase {
         }
     }
 
-    //closing connection
+
     public void closeConnection() {
         try {
             if (statement != null) {
