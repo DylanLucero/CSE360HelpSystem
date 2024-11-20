@@ -232,7 +232,7 @@ class DatabaseHelper {
     			+ "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
     			+ "articleType VARCHAR(255), " 
     			+ "articleLevel VARCHAR(255), "
-    			+ "articleBody VARCHAR(255), "
+    			+ "articleBody VARCHAR(255)"
 				+ ");";
 		statement.execute(createTableSQL); //execute table creation
     }
