@@ -17,6 +17,7 @@ class DatabaseHelper {
 
 	private Connection connection = null;
 	private Statement statement = null; 
+	
 	//	PreparedStatement pstmt
 
 	public void connectToDatabase() throws SQLException {
@@ -28,8 +29,8 @@ class DatabaseHelper {
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
 			dropTable("articleList");
 			createTableUsers();
-			createHelpArticleTable();
 			createTableArticles();// Create the necessary tables if they don't exist
+			createHelpArticleTable();
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
@@ -40,9 +41,11 @@ class DatabaseHelper {
 	 */
 	public void connectToSecondaryDatabase() throws Exception{
 		SecondDatabase dbHelper = new SecondDatabase();
+		SpecialAccess specialAccess = new SpecialAccess();
 		 try {
 		        dbHelper.connectToDatabase(); 
-		        System.out.println("Connecting to database 2");
+	            specialAccess.connectToSpecialAccessDatabase();
+		        System.out.println("Connecting to databases 2 and 3");
 		    } catch (SQLException e) {
 		        e.printStackTrace();
 		    }
@@ -52,8 +55,8 @@ class DatabaseHelper {
 		HelpArticleDatabase dbAHelper = new HelpArticleDatabase();
 		dbAHelper.connectToDatabase();
         System.out.println("Connecting to Help Article Database");
-
 	}
+	
 	
     // Create the cse360users table
     private void createTableUsers() {
@@ -75,6 +78,21 @@ class DatabaseHelper {
             e.printStackTrace();
         }
     }
+    
+    private void createHelpArticleTable(){
+    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
+    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
+    			+ "article_type VARCHAR(50), " 
+    			+ "articlel_level VARCHAR(50), "
+    			+ "article_body VARCHAR(255) UNIQUE; ";
+    	try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
+            System.out.println("Table created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
     
     
     // Drop the tables
@@ -124,10 +142,15 @@ class DatabaseHelper {
 			pstmt.setString(2, password);
 			pstmt.setString(3, role);
 			try (ResultSet rs = pstmt.executeQuery()) {
+				//if this logic succeeds, load their access info
+				if (rs.next()){
+					loadUserAccess(username);
+				}
 				return rs.next();
 			}
 		}
 	}
+	
 	public boolean adminLogin(String username, String password, String role) throws SQLException {
 		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
@@ -208,6 +231,15 @@ class DatabaseHelper {
 	    }
 	}
 	
+	/*
+	 * All things to do with access checking! WOW this is so fun
+	 */
+	
+	public static void loadUserAccess(String user) {
+		
+	}
+	
+
 /*
  * Article table 
  */
@@ -227,16 +259,6 @@ class DatabaseHelper {
 		statement.execute(createTableSQL); //execute table creation
     }
     
-    private void createHelpArticleTable() throws SQLException{
-    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helpArticleList ("
-    			+ "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
-    			+ "articleType VARCHAR(255), " 
-    			+ "articleLevel VARCHAR(255), "
-    			+ "articleBody VARCHAR(255)"
-				+ ");";
-		statement.execute(createTableSQL); //execute table creation
-    }
-    
 	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
 		//prepare sql statement for inserting a new article 
@@ -252,7 +274,12 @@ class DatabaseHelper {
 			pstmt.setString(8, referencesString); //set references 
 			pstmt.executeUpdate(); //execute the insert statement 
 		}
-	}		
+	}
+	
+	public void createHelpArticle() {
+		
+	}
+	
 	public void accessArticle(long ID) throws Exception {
 	    // SQL query to retrieve an article by its ID
 
@@ -265,7 +292,7 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String group = rs.getString("articleGroup");
+					String group = rs.getString("group");
 					String title = rs.getString("title");
 	                String authors = rs.getString("authors");
 	                String abstractText = rs.getString("abstract");
@@ -388,7 +415,7 @@ class DatabaseHelper {
 		
 	}
 	public void deleteArticle(long id) throws Exception {
-	    String sql = "UPDATE articleList SET group = NULL, title = NULL, authors = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
+	    String sql = "UPDATE articleList SET articleGroup = NULL, title = NULL, authors = NULL, header = NULL, abstract = NULL, keywords = NULL, body = NULL, references = NULL WHERE id = ?"; // SQL update statement
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setLong(1, id); //set ID for deletion 
 			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 
