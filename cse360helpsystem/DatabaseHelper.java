@@ -411,6 +411,17 @@ class DatabaseHelper {
 	        
 	}
 	}
+	public void updateHelpArticle(String id, String level, String type) throws SQLException {
+	    String updateArticle = "UPDATE articleList SET articleGroup = ?, title = ?, authors = ?, abstract = ?, keywords = ?, body = ?, references = ? WHERE id = ?";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
+	        pstmt.setString(1, type); 
+	        pstmt.setString(2, level); // Set title
+	        pstmt.setLong(8, Integer.valueOf(id)); // Set the ID of the article to update
+	        pstmt.executeUpdate();
+	        
+	}
+	}
 	public void displayList(String group) throws Exception{
 		String sql = "";
 		PreparedStatement stmt = null; //create statement 

@@ -120,7 +120,8 @@ public class Main extends Application {
 			        	}
 		        }
 		        else {
-	        		window.setScene(studentWindow());	
+		        	System.out.println("Login Error");
+//	        		window.setScene(studentWindow());	
 
 			        return;
 		        }
