@@ -90,19 +90,21 @@ private EncryptionHelper encryptionHelper;
         }
     }
     
-    private void createHelpArticleTable(){
-    	String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
-    			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
-    			+ "article_type VARCHAR(50), " 
-    			+ "articlel_level VARCHAR(50), "
-    			+ "article_body VARCHAR(255) UNIQUE);";
-    	try (Statement stmt = connection.createStatement()) {
+    private void createHelpArticleTable() {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                + "article_type VARCHAR(50), " 
+                + "article_level VARCHAR(50), " // Fixed typo 'articlel_level' to 'article_level'
+                + "article_body VARCHAR(255) UNIQUE" // Removed the semicolon here
+                + ");"; // Closing the CREATE TABLE statement properly
+        try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             System.out.println("Table created successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     
     
     
