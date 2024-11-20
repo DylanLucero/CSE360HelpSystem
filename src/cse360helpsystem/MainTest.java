@@ -6,7 +6,17 @@ import java.sql.SQLException;
 
 public class MainTest {
 	
-	public static DatabaseHelper dbHelper = new DatabaseHelper();
+	public static DatabaseHelper dbHelper;
+
+	static {
+	    try {
+	        dbHelper = new DatabaseHelper();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        // Optionally, terminate the application if the database cannot be initialized
+	        throw new RuntimeException("Failed to initialize DatabaseHelper", e);
+	    }
+	}
 
     @Test
     public void testRegisterUser() throws SQLException {

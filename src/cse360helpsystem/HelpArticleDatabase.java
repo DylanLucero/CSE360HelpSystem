@@ -8,6 +8,17 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * <p> AnotherDatabase class </p>
+ * 
+ *
+ *
+ * <p>Description: A Java application that can restore and store files of articles </p>
+ * 
+ * @author Olivia Pratt
+ * 
+ * @version 1.0
+ */
 
 class HelpArticleDatabase {
 

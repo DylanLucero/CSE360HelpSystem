@@ -28,8 +28,18 @@ import java.sql.SQLException;
 public class Main extends Application {
 	Stage window;
 	
+	private static DatabaseHelper databaseHelper;
 
-	private static DatabaseHelper databaseHelper = new DatabaseHelper();
+	static {
+	    try {
+	        databaseHelper = new DatabaseHelper();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        // Optionally, terminate the application if the database cannot be initialized
+	        throw new RuntimeException("Failed to initialize DatabaseHelper", e);
+	    }
+	}
+	
     public void setDatabaseHelper(DatabaseHelper databaseHelper) {
         Main.databaseHelper = databaseHelper;
     }	

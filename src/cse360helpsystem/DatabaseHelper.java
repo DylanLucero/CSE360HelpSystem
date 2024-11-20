@@ -1,7 +1,12 @@
 package cse360helpsystem;
+
 import java.io.IOException;
 import java.sql.*;
 import java.util.Base64;
+
+import org.bouncycastle.util.Arrays;
+import Encryption.EncryptionHelper;
+import Encryption.EncryptionUtils;
 
 
 
@@ -17,6 +22,12 @@ class DatabaseHelper {
 
 	private Connection connection = null;
 	private Statement statement = null; 
+	
+private EncryptionHelper encryptionHelper;
+	
+	public DatabaseHelper() throws Exception {
+		encryptionHelper = new EncryptionHelper();
+	}
 	
 	//	PreparedStatement pstmt
 
@@ -84,7 +95,7 @@ class DatabaseHelper {
     			+ "id INT AUTO_INCREMENT PRIMARY KEY, "
     			+ "article_type VARCHAR(50), " 
     			+ "articlel_level VARCHAR(50), "
-    			+ "article_body VARCHAR(255) UNIQUE; ";
+    			+ "article_body VARCHAR(255) UNIQUE);";
     	try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
             System.out.println("Table created successfully.");
@@ -292,13 +303,19 @@ class DatabaseHelper {
 				if (rs.next()) {
 	                // Retrieve article fields from the result set
 
-					String group = rs.getString("group");
+					String group = rs.getString("articleGroup");
 					String title = rs.getString("title");
 	                String authors = rs.getString("authors");
 	                String abstractText = rs.getString("abstract");
 	                String keywords = rs.getString("keywords");
 	                String body = rs.getString("body");
 	                String references = rs.getString("references");
+	        		// Encryption for the body of the article unless specifically given access
+	        		
+	        		String encryptedBody = Base64.getEncoder().encodeToString(
+	        				encryptionHelper.encrypt(body.getBytes(), EncryptionUtils.getInitializationVector(body.toCharArray()))
+	        		);
+	        		
 	                
 	                //decrypt data with title as iv 
 	                
@@ -322,7 +339,7 @@ class DatabaseHelper {
 	                
 	                // Print body
 	                System.out.println("| Body: ");
-	                System.out.println("| " + body); // Indent each line of the body
+	                System.out.println("| " + encryptedBody); // Indent each line of the body
 	                
 	                // Print references
 	                System.out.printf("| References: %-13s |\n", references);
