@@ -35,15 +35,19 @@ class SpecialAccess{
 	private void createTableSpecialAccess() {
 		String createSpecialAccessArticlesSQL = "CREATE TABLE if NOT EXISTS specialAccessArticles ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
-				+ "articleGroup VARCHAR(255));)"; 
+				+ "articleListId BIGINT, " //id of the article in articleList
+				+ "articleGroup VARCHAR(255)"
+				+ ");"; 
 	    String createSpecialDecryptedAccessSQL = "CREATE TABLE IF NOT EXISTS specialAccessToDecrypted ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "role VARCHAR(50), "
-	    		+ "username VARCHAR(100));)";
+	    		+ "username VARCHAR(100)"
+	    		+ ");";
 	    String createSpecialAdminListSQL = "CREATE TABLE IF NOT EXISTS specialAccessAdmins ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
                 + "role VARCHAR(50), "
-	    		+ "username VARCHAR(100));)";
+	    		+ "username VARCHAR(100)"
+                + ");";
 	    try (Statement stmt = connection.createStatement()) {
 	    	stmt.execute(createSpecialAccessArticlesSQL);
 	        stmt.execute(createSpecialDecryptedAccessSQL);
@@ -79,7 +83,7 @@ class SpecialAccess{
 	public void listEncryptedArticles(String articleGroup) throws SQLException {
 		String groupRetrieval = "SELECT * FROM specialAccessArticles WHERE articleGroup = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(groupRetrieval)){
-			pstmt.setString(1, groupRetrieval);
+			pstmt.setString(1, articleGroup);
 			try (ResultSet rs = pstmt.executeQuery()){
 				if (rs.next()) {
 					rs.getLong("id");
@@ -112,6 +116,5 @@ class SpecialAccess{
 		} 
 	}
 }
-
 
 
