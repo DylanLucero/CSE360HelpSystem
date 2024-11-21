@@ -15,7 +15,7 @@ class DatabaseHelper {
 	static final String USER = "sa"; 
 	static final String PASS = ""; 
 
-	private Connection connection = null;
+	private static Connection connection = null;
 	private Statement statement = null; 
 	
 	//	PreparedStatement pstmt
@@ -58,6 +58,33 @@ class DatabaseHelper {
         System.out.println("Connecting to Help Article Database");
 	}
 	
+	private static void listTableContents(String tableName) throws SQLException {
+        String sql = "SELECT * FROM " + tableName;
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            // Get metadata for the result set to fetch column names
+            ResultSetMetaData rsMetaData = rs.getMetaData();
+            int columnCount = rsMetaData.getColumnCount();
+
+            // Print column names
+            for (int i = 1; i <= columnCount; i++) {
+                System.out.print(rsMetaData.getColumnName(i) + "\t");
+            }
+            System.out.println();
+
+            // Print row data
+            while (rs.next()) {
+                for (int i = 1; i <= columnCount; i++) {
+                    System.out.print(rs.getString(i) + "\t");
+                }
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving contents of table " + tableName + ": " + e.getMessage());
+        }
+        }
+	
 	
     // Create the cse360users table
     private void createTableUsers() {
@@ -93,9 +120,167 @@ class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }    public String getHelpTableBody(int id) {
+        String getContents = "SELECT article_body FROM helparticletable WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            // Set the id parameter
+            stmt.setInt(1, id);
+            
+            // Execute the query and get the result set
+            ResultSet rs = stmt.executeQuery();
+            
+            // Process the result set
+            if (rs.next()) {
+                // Get the 'body' column from the result set
+                result = rs.getString("article_body");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    public String getHelpTableLevel(int id) {
+        String getContents = "SELECT article_level FROM helparticletable WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            // Set the id parameter
+            stmt.setInt(1, id);
+            
+            // Execute the query and get the result set
+            ResultSet rs = stmt.executeQuery();
+            
+            // Process the result set
+            if (rs.next()) {
+                // Get the 'body' column from the result set
+                result = rs.getString("article_level");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    public String getHelpTableType(int id) {
+        String getContents = "SELECT article_type FROM helparticletable WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                result = rs.getString("article_type");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
     }
 
-    
+    public String getTableBody(int id) {
+        String getContents = "SELECT body FROM articleList WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            // Set the id parameter
+            stmt.setInt(1, id);
+            
+            // Execute the query and get the result set
+            ResultSet rs = stmt.executeQuery();
+            
+            // Process the result set
+            if (rs.next()) {
+                // Get the 'body' column from the result set
+                result = rs.getString("body");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    public String getTableAuthor(int id) {
+        String getContents = "SELECT authors FROM articleList WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            // Set the id parameter
+            stmt.setInt(1, id);
+            
+            // Execute the query and get the result set
+            ResultSet rs = stmt.executeQuery();
+            
+            // Process the result set
+            if (rs.next()) {
+                // Get the 'body' column from the result set
+                result = rs.getString("authors");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    public String getTableTitle(int id) {
+        String getContents = "SELECT title FROM articleList WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                result = rs.getString("title");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    public String getTableType(int id) {
+        String getContents = "SELECT * FROM articleList WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                result = rs.getString("Title");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
     
     
     // Drop the tables

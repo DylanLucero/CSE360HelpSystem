@@ -36,7 +36,7 @@ public class Main extends Application {
 	public Scene loginSc, studentSc, instructorSc, roleSc, adminSc, setupSc, 
 			establishSc, establishAdminSc, createArticleSc, updateArticleSc, 
 			removeArticleSc, restoreSc, helpSc, searchSc, viewHelpArticleSc,
-			removeHelpArticleSc;
+			removeHelpArticleSc,displayArticleSc, displayHelpArticleSc, numInput;
 	
 	public 	Alert a = new Alert(AlertType.NONE);
 
@@ -120,8 +120,8 @@ public class Main extends Application {
 			        	}
 		        }
 		        else {
-		        	System.out.println("Login Error");
-//	        		window.setScene(studentWindow());	
+		        	//System.out.println("Login Error");
+	        		window.setScene(studentWindow());	
 
 			        return;
 		        }
@@ -185,9 +185,11 @@ public class Main extends Application {
 		Button help = new Button("Help");
 		Button viewHelp = new Button("View Help Article");
 		Button search = new Button("Search");
+		Button viewArticle = new Button("View Article");
 
 		
 		//databaseHelper.deleteHelpArticle();
+		
 		
 		logout.setOnAction(e->{
 			window.setScene(loginSc);
@@ -202,7 +204,15 @@ public class Main extends Application {
 		});
 		
 		viewHelp.setOnAction(e->{
-			window.setScene(viewHelpArticleWindow());
+			window.setScene(displayHelpArticleWindow());
+		});
+		viewArticle.setOnAction(e->{
+			try {
+				window.setScene(displayArticleWindow());
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		
 
@@ -214,6 +224,7 @@ public class Main extends Application {
 		gPane.add(help, 1,1,1,1);
 		gPane.add(search, 1, 2);
 		gPane.add(viewHelp, 1,3);
+		gPane.add(viewArticle, 1,4);
 		gPane.add(logout,1,5,1,1);
 		gPane.setVgap(10);
 		
@@ -277,7 +288,7 @@ public class Main extends Application {
 		// For Viewing the article, creates a pop up
 		viewArticle.setOnAction(e->{
 			try {
-				databaseHelper.accessArticle(2);
+				databaseHelper.accessArticle(1);
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -423,12 +434,12 @@ public class Main extends Application {
 		 
 
 	viewArticle.setOnAction(e->{
-			try {
-				databaseHelper.accessArticle(1);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+		try {
+			window.setScene(displayArticleWindow());
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		});
 		
 		
@@ -1100,6 +1111,7 @@ public class Main extends Application {
 	public Scene searchWindow() {
 		TextField search = new TextField("");
 		search.setPromptText("Search");
+		Label result = new Label("");
 				
 		ObservableList<String> options = 
 			    FXCollections.observableArrayList(
@@ -1116,7 +1128,7 @@ public class Main extends Application {
 		Button cancel = new Button("Cancel");
 		
 		searchButton.setOnAction(e->{
-			// This will need to be a database query
+			result.setText(databaseHelper.getTableTitle(1));
 			
 		});
 		
@@ -1127,9 +1139,10 @@ public class Main extends Application {
 		GridPane gPane = new GridPane();
 		gPane.setAlignment(Pos.CENTER);
 		
-		gPane.add(search, 1, 0);
+		gPane.add(search, 0, 0);
+		gPane.add(result, 0, 1);
 		gPane.add(searchButton, 2, 1);
-		gPane.add(level, 0, 0);
+		gPane.add(level, 1, 0);
 		gPane.add(cancel, 1,1);
 		
 		searchSc = new Scene(gPane, 640,480);
@@ -1150,7 +1163,7 @@ public class Main extends Application {
 		
 		search.setOnAction(e->{
 			try {
-				databaseHelper.accessHelpArticle(id.getText());
+				displayHelpArticleWindow();
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -1199,6 +1212,67 @@ public class Main extends Application {
 		removeHelpArticleSc = new Scene(gPane, 640, 480);
 		return removeHelpArticleSc;
 		
+	}
+	
+	public Scene displayHelpArticleWindow() {
+		TextField title = new TextField();
+		title.setEditable(false);
+		TextField author = new TextField();
+		author.setEditable(false);
+		TextArea body = new TextArea();
+		body.setEditable(false);
+		Button back = new Button("Back");
+		
+		
+		title.setText(databaseHelper.getHelpTableLevel(1));
+		author.setText(databaseHelper.getHelpTableType(1));
+		body.setText(databaseHelper.getHelpTableBody(1));
+		
+		back.setOnAction(e->{
+			window.setScene(studentWindow());
+		});
+
+		
+		GridPane gPane = new GridPane();
+		
+		gPane.add(title, 1, 0);
+		gPane.add(author, 2, 1);
+		gPane.add(body,1,1);
+		gPane.add(back, 2, 2);
+		
+		displayArticleSc = new Scene(gPane, 640, 480);
+		return displayArticleSc;
+	}
+
+	
+	public Scene displayArticleWindow() throws SQLException {
+		TextField title = new TextField();
+		title.setEditable(false);
+		TextField author = new TextField();
+		author.setEditable(false);
+		TextArea body = new TextArea();
+		body.setEditable(false);
+		Button back = new Button("Back");
+		
+		
+		title.setText(databaseHelper.getTableTitle(1));
+		author.setText(databaseHelper.getTableAuthor(1));
+		body.setText(databaseHelper.getTableBody(1));
+		
+		back.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+
+		
+		GridPane gPane = new GridPane();
+		
+		gPane.add(title, 1, 0);
+		gPane.add(author, 2, 1);
+		gPane.add(body,1,1);
+		gPane.add(back, 2, 2);
+		
+		displayArticleSc = new Scene(gPane, 640, 480);
+		return displayArticleSc;
 	}
 	
 	
