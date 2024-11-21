@@ -149,19 +149,21 @@ private EncryptionHelper encryptionHelper;
 	}
 
 	public boolean login(String username, String password, String role) throws SQLException {
-		String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-			pstmt.setString(1, username);
-			pstmt.setString(2, password);
-			pstmt.setString(3, role);
-			try (ResultSet rs = pstmt.executeQuery()) {
-				//if this logic succeeds, load their access info
-				if (rs.next()){
-					loadUserAccess(username);
-				}
-				return rs.next();
-			}
-		}
+	    String query = "SELECT * FROM cse360users WHERE username = ? AND password = ? AND role = ?";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        pstmt.setString(1, username);
+	        pstmt.setString(2, password);
+	        pstmt.setString(3, role);
+	        
+	        try (ResultSet rs = pstmt.executeQuery()) {
+	            // Store the result of rs.next() to avoid moving the cursor multiple times
+	            boolean loginSuccessful = rs.next();
+	            if (loginSuccessful) {
+	                loadUserAccess(username);  // Load user access info if login is successful
+	            }
+	            return loginSuccessful;  // Return whether the login was successful
+	        }
+	    }
 	}
 	
 	public boolean adminLogin(String username, String password, String role) throws SQLException {
@@ -199,6 +201,7 @@ private EncryptionHelper encryptionHelper;
 
         while (resultSet.next()) {
             System.out.println("UserName: " + resultSet.getString("username"));
+            System.out.println("Role: " + resultSet.getString("role"));
             System.out.println("First Name: " + resultSet.getString("first_name"));
            System.out.println("Last Name: " + resultSet.getString("last_name"));
            System.out.println("Preferred Name: " + resultSet.getString("preferred_name"));

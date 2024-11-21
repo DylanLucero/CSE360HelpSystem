@@ -11,6 +11,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -126,6 +128,11 @@ public class Main extends Application {
 			        	} else {
 			        		window.setScene(instructorWindow());	
 			        	}
+		        }
+		        else if (databaseHelper.doesUserExist(userText.getText())) {
+		            // No role assigned, go to roleWindow
+		            System.out.println("Login Success - No Role Assigned");
+		            window.setScene(roleSelect()); // Redirect to role selection window
 		        }
 		        else {
 		        	a.setAlertType(AlertType.ERROR);
@@ -679,6 +686,42 @@ public class Main extends Application {
 	
 
 	
+	public Scene roleWindow(){
+        Label title = new Label("Role Selection");
+        MenuButton role = new MenuButton("Click to Select Role");
+        MenuItem sButton = new MenuItem("Student");
+        MenuItem iButton = new MenuItem("Instructor");
+        MenuItem aButton = new MenuItem("Admin");
+
+
+
+        // Button Actions for Menu
+        sButton.setOnAction(e->{ 
+            window.setScene(studentWindow());
+            System.out.println("Student View");
+            });
+
+        aButton.setOnAction(e->{ 
+            window.setScene(adminWindow());
+            System.out.println("Admin View");
+        });
+
+        iButton.setOnAction(e->{ 
+            window.setScene(instructorWindow());
+            System.out.println("Instructor View");
+        });
+
+        // Adding to Grid
+        role.getItems().addAll(sButton, iButton, aButton);
+        GridPane gPane = new GridPane();
+        gPane.setAlignment(Pos.CENTER);
+        gPane.add(role, 3,2,1,1);
+        gPane.add(title,3,1,1,1);
+        gPane.setVgap(10);
+
+        studentSc = new Scene(gPane, 640, 480);
+        return studentSc;
+    }
 	/* Finish Setting Up Account Window
 	 * ---------------------------------------
 	 * 
@@ -874,6 +917,65 @@ public class Main extends Application {
 		createArticleSc = new Scene(gPane,640,480);
 		return createArticleSc;
 	}
+	public Scene roleSelect() {
+        // Create buttons
+        Button send = new Button("Send");
+        Button back = new Button("Back");
+
+        // Create dropdown options
+        ObservableList<String> options = FXCollections.observableArrayList(
+            "Student",
+            "Instructor"
+        );
+
+        // Dropdown for selecting roles
+        final ComboBox<String> role = new ComboBox<>(FXCollections.observableArrayList());
+        final ComboBox<String> select = new ComboBox<>(options);
+
+        // Set prompts
+        select.setPromptText("Question Type");
+        role.setPromptText("Role");
+
+        // Send button logic
+        send.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                String selectedOption = select.getValue();
+                if (selectedOption != null) {
+                    role.setValue(selectedOption); // Add the selected role to the role dropdown
+                    System.out.println("Selected Role: " + selectedOption); // For debugging
+                } else {
+                    System.out.println("No role selected!");
+                }
+            }
+        });
+
+        // Back button logic
+        back.setOnAction(e -> {
+            if (studentSc != null) {
+                window.setScene(studentSc); // Return to the previous screen
+            } else {
+                System.out.println("No previous scene set!");
+            }
+        });
+
+        // GridPane layout
+        GridPane gPane = new GridPane();
+        gPane.setHgap(10);
+        gPane.setVgap(10);
+
+        // Add components to GridPane
+        gPane.add(new Label("Select Role:"), 0, 0);
+        gPane.add(select, 1, 0);
+        gPane.add(new Label("Assigned Role:"), 0, 1);
+        gPane.add(role, 1, 1);
+        gPane.add(back, 0, 2);
+        gPane.add(send, 1, 2);
+
+        // Return the scene
+        return new Scene(gPane, 400, 200);
+    }
+
 	
 	public Scene restoreWindow() {
 		Button removeAll = new Button("Remove All");
