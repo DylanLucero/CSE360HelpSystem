@@ -1015,6 +1015,8 @@ public class Main extends Application {
 	public Scene helpWindow() {		
 		Button send = new Button("Send");
 		Button back = new Button("Go Back");
+		TextField title = new TextField();
+		title.setPromptText("Title");
 		
 		TextArea prompt = new TextArea();
 		prompt.setPromptText("Enter your question");
@@ -1050,7 +1052,7 @@ public class Main extends Application {
 	                		a.show();
 	                		return;
 	                	}try {
-							databaseHelper.createHelpArticle(select.getValue().toString(), level.getValue().toString(), prompt.getText());
+							databaseHelper.createHelpArticle(title.getText(),select.getValue().toString(), level.getValue().toString(), prompt.getText());
 							System.out.println("Success");
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -1072,7 +1074,7 @@ public class Main extends Application {
 		                		return;
 		                	}
 		                		try {
-									databaseHelper.createHelpArticle(select.getValue().toString(), level.getValue().toString(), prompt.getText());
+									databaseHelper.createHelpArticle( title.getText(),select.getValue().toString(), level.getValue().toString(), prompt.getText());
 									System.out.println("Success");
 								} catch (SQLException e1) {
 									// TODO Auto-generated catch block
@@ -1099,7 +1101,8 @@ public class Main extends Application {
 		
 		
 		gPane.add(select,0,0);
-		gPane.add(level, 1, 0);
+		gPane.add(title, 1, 0);
+		gPane.add(level, 2, 0);
 		gPane.add(prompt, 0, 1);
 		gPane.add(back, 0, 2);
 		gPane.add(send, 1, 2);
@@ -1128,7 +1131,7 @@ public class Main extends Application {
 		Button cancel = new Button("Cancel");
 		
 		searchButton.setOnAction(e->{
-			result.setText(databaseHelper.getTableTitle(1));
+			result.setText(databaseHelper.getHelpTableTitle(1));
 			
 		});
 		
@@ -1163,7 +1166,7 @@ public class Main extends Application {
 		
 		search.setOnAction(e->{
 			try {
-				displayHelpArticleWindow();
+				window.setScene(displayHelpArticleWindow());
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

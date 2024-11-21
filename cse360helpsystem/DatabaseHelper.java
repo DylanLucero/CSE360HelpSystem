@@ -110,6 +110,7 @@ class DatabaseHelper {
     private void createHelpArticleTable() {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS helparticletable ("
                 + "id INT AUTO_INCREMENT PRIMARY KEY, "
+        		+ "article_title VARCHAR(50), "
                 + "article_type VARCHAR(50), " 
                 + "article_level VARCHAR(50), " // Fixed typo 'articlel_level' to 'article_level'
                 + "article_body VARCHAR(255) UNIQUE" // Removed the semicolon here
@@ -120,7 +121,8 @@ class DatabaseHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }    public String getHelpTableBody(int id) {
+    }    
+    public String getHelpTableBody(int id) {
         String getContents = "SELECT article_body FROM helparticletable WHERE id = ?";
         String result = null; // Initialize the result variable to return
 
@@ -145,6 +147,33 @@ class DatabaseHelper {
 
         return result;
     }
+    
+    public String getHelpTableTitle(int id) {
+        String getContents = "SELECT article_title FROM helparticletable WHERE id = ?";
+        String result = null; // Initialize the result variable to return
+
+        try (PreparedStatement stmt = connection.prepareStatement(getContents)) {
+            // Set the id parameter
+            stmt.setInt(1, id);
+            
+            // Execute the query and get the result set
+            ResultSet rs = stmt.executeQuery();
+            
+            // Process the result set
+            if (rs.next()) {
+                // Get the 'body' column from the result set
+                result = rs.getString("article_title");
+            } else {
+                result = "No content found for the given ID.";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            result = "Error fetching content.";
+        }
+
+        return result;
+    }
+    
     public String getHelpTableLevel(int id) {
         String getContents = "SELECT article_level FROM helparticletable WHERE id = ?";
         String result = null; // Initialize the result variable to return
@@ -464,12 +493,13 @@ class DatabaseHelper {
 		}
 	}
 	
-	public void createHelpArticle(String type, String level, String body) throws SQLException {
-		String insertArticle = "INSERT INTO helparticletable (article_type, article_level, article_body) VALUES (?, ?, ?)";
+	public void createHelpArticle(String title, String type, String level, String body) throws SQLException {
+		String insertArticle = "INSERT INTO helparticletable (article_title, article_type, article_level, article_body) VALUES (?, ?, ?, ?)";
 		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
-			pstmt.setString(1, type);
-			pstmt.setString(2, level); //set title
-			pstmt.setString(3, body);
+			pstmt.setString(1, title);
+			pstmt.setString(2, type);
+			pstmt.setString(3, level); //set title
+			pstmt.setString(4, body);
 			pstmt.executeUpdate(); //execute the insert statement 
 
 		}
