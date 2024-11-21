@@ -39,6 +39,7 @@ private EncryptionHelper encryptionHelper;
 			statement = connection.createStatement(); 
 			dropTable("cse360users"); 	// Enabled to remove all data from database. Comment out if you want to use the database
 			dropTable("articleList");
+			dropTable("helparticletable");
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
 			createHelpArticleTable();
@@ -275,7 +276,7 @@ private EncryptionHelper encryptionHelper;
 		statement.execute(createTableSQL); //execute table creation
     }
     
-	public void register(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
+	public void createArticle(String groupString, String titleString, String headerString, String authorsString, String abstractTextString, String keywordsString, String bodyString, String referencesString) throws Exception {
 		
 		//prepare sql statement for inserting a new article 
 		String insertArticle = "INSERT INTO articleList (articleGroup, title, authors, header, abstract, keywords, body, references) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
@@ -292,8 +293,63 @@ private EncryptionHelper encryptionHelper;
 		}
 	}
 	
-	public void createHelpArticle() {
-		
+	public void createHelpArticle(String type, String level, String body) throws SQLException {
+		String insertArticle = "INSERT INTO helparticletable (article_type, article_level, article_body) VALUES (?, ?, ?)";
+		try (PreparedStatement pstmt = connection.prepareStatement(insertArticle)) {
+			pstmt.setString(1, type);
+			pstmt.setString(2, level); //set title
+			pstmt.setString(3, body);
+			pstmt.executeUpdate(); //execute the insert statement 
+
+		}
+	}
+	
+	public void accessHelpArticle(String id) throws Exception{
+	    // SQL query to retrieve an article by its ID
+
+		String sql = "SELECT * FROM helparticletable WHERE id = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)){
+			pstmt.setLong(1, Integer.valueOf(id));
+		    // Prepare the statement to execute the query
+
+			try (ResultSet rs = pstmt.executeQuery()){
+				if (rs.next()) {
+	                // Retrieve article fields from the result set
+
+					String type = rs.getString("article_type");
+					String level = rs.getString("article_level");
+	                String body = rs.getString("article_body");
+
+
+	                System.out.println("+---------------------+");
+	                System.out.println("|      Article        |");
+	                System.out.println("+---------------------+");
+	                System.out.printf("| Level: %-20s 	|\n", type);
+	                System.out.printf("| Type: %-20s 		|\n", level);
+	                System.out.println("| Body: ");
+	                System.out.println("| " + body); // Indent each line of the body
+	                // Print footer
+	                System.out.println("+---------------------+");
+	                }
+				}
+			}
+		}
+	
+	public void deleteHelpArticle(String id) throws Exception {
+	    String sql = "UPDATE helparticletable SET article_type = NULL, article_level = NULL, article_body = NULL WHERE id = ?"; // SQL update statement
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setLong(1, Integer.valueOf(id)); //set ID for deletion 
+			int rowsAffected = pstmt.executeUpdate(); //execute the delete statement 
+			//check if any rows were affected (i.e. if the article was found and deleted)
+			if (rowsAffected > 0) {
+                System.out.println("Article fields set to NULL successfully.");
+            } else {
+                System.out.println("No article found with the given ID.");
+            }
+		} catch (SQLException e) { //debugging check 
+			e.printStackTrace();
+			throw e;
+		}
 	}
 	
 	public void accessArticle(long ID) throws Exception {
@@ -371,6 +427,19 @@ private EncryptionHelper encryptionHelper;
 	        pstmt.setString(6, bodyString); // Set body
 	        pstmt.setString(7, referencesString); // Set references
 	        pstmt.setLong(8, id); // Set the ID of the article to update
+	        pstmt.executeUpdate();
+	        
+	}
+	}
+	public void updateHelpArticle(String id, String level, String type, String body) throws SQLException {
+	    String updateArticle = "UPDATE helparticletable SET article_type = ?, article_level = ?, article_body = ? WHERE id = ?";
+	    
+	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
+	        pstmt.setString(2, type); 
+	        pstmt.setString(3, level); // Set title
+	        pstmt.setString(4, body);
+	        
+	        pstmt.setLong(1, Integer.valueOf(id)); // Set the ID of the article to update
 	        pstmt.executeUpdate();
 	        
 	}
