@@ -411,12 +411,14 @@ class DatabaseHelper {
 	        
 	}
 	}
-	public void updateHelpArticle(String id, String level, String type) throws SQLException {
+	public void updateHelpArticle(String id, String level, String type, String body) throws SQLException {
 	    String updateArticle = "UPDATE helparticletable SET article_type = ?, article_level = ?, article_body = ? WHERE id = ?";
 	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
 	        pstmt.setString(2, type); 
 	        pstmt.setString(3, level); // Set title
+	        pstmt.setString(4, body);
+	        
 	        pstmt.setLong(1, Integer.valueOf(id)); // Set the ID of the article to update
 	        pstmt.executeUpdate();
 	        
