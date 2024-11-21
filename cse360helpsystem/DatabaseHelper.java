@@ -412,12 +412,12 @@ class DatabaseHelper {
 	}
 	}
 	public void updateHelpArticle(String id, String level, String type) throws SQLException {
-	    String updateArticle = "UPDATE articleList SET articleGroup = ?, title = ?, authors = ?, abstract = ?, keywords = ?, body = ?, references = ? WHERE id = ?";
+	    String updateArticle = "UPDATE helparticletable SET article_type = NULL, article_level = NULL, article_body = NULL WHERE id = ?";
 	    
 	    try (PreparedStatement pstmt = connection.prepareStatement(updateArticle)) {
-	        pstmt.setString(1, type); 
-	        pstmt.setString(2, level); // Set title
-	        pstmt.setLong(8, Integer.valueOf(id)); // Set the ID of the article to update
+	        pstmt.setString(2, type); 
+	        pstmt.setString(3, level); // Set title
+	        pstmt.setLong(1, Integer.valueOf(id)); // Set the ID of the article to update
 	        pstmt.executeUpdate();
 	        
 	}
