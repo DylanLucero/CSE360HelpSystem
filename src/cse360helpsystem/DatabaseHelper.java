@@ -3,6 +3,7 @@ package cse360helpsystem;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Base64;
+import java.util.Random;
 
 import org.bouncycastle.util.Arrays;
 import Encryption.EncryptionHelper;
@@ -22,6 +23,8 @@ class DatabaseHelper {
 
 	private static Connection connection = null;
 	private Statement statement = null; 
+	private String lastVerifiedRole;
+	
 	
 private EncryptionHelper encryptionHelper;
 	
@@ -43,6 +46,7 @@ private EncryptionHelper encryptionHelper;
 			createTableUsers();
 			createTableArticles();// Create the necessary tables if they don't exist
 			createHelpArticleTable();
+			createOTPTable();
 		} catch (ClassNotFoundException e) {
 			System.err.println("JDBC Driver not found: " + e.getMessage());
 		}
@@ -132,7 +136,71 @@ private EncryptionHelper encryptionHelper;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }    
+    }   
+    
+    private void createOTPTable() {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS otpRecords ("
+                + "id INT AUTO_INCREMENT PRIMARY KEY, "  // Correct syntax for auto-increment in H2
+                + "otp VARCHAR(10), "
+                + "role VARCHAR(50)"
+                + ");";
+        
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
+            System.out.println("OTPTable created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void saveOTPToDatabase(String otp, String role) {
+        String insertSQL = "INSERT INTO otpRecords (otp, role) VALUES (?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
+            pstmt.setString(1, otp);  // Set OTP value
+            pstmt.setString(2, role);  // Set role value
+            pstmt.executeUpdate();  // Execute the insert statement to store OTP in database
+            System.out.println("OTP for role " + role + " saved to database successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save OTP to the database", e);
+        }
+    }
+    public String getLastVerifiedRole() {
+	    return lastVerifiedRole;
+	}
+	public boolean verifyOTP(String enteredOTP) throws SQLException {
+	    String query = "SELECT otp, role FROM otpRecords ORDER BY created_at DESC LIMIT 1";
+	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+	        try (ResultSet rs = pstmt.executeQuery()) {
+	            if (rs.next()) {
+	                String storedOTP = rs.getString("otp");
+	                if (enteredOTP.equals(storedOTP)) {
+	                    lastVerifiedRole = rs.getString("role"); // Save the role for later use
+	                    return true; // OTP is valid
+	                }
+	            }
+	        }
+	    }
+	    lastVerifiedRole = null; // Clear the role if OTP is invalid
+	    return false; // OTP is invalid
+	}
+	public static Random rand = new Random();
+	public static String stringOTP;
+
+	// Generating an OTP
+	public String generateOTP(String role) {
+		int userOTP = rand.nextInt(100,9999);
+		if(userOTP<1000) {
+			stringOTP = "0" + userOTP;
+		} else {
+            stringOTP = Integer.toString(userOTP);
+        }
+
+        // Save the OTP to the database
+        saveOTPToDatabase(stringOTP, role);
+
+        return stringOTP;
+    }
     public String getHelpTableBody(int id) {
         String getContents = "SELECT article_body FROM helparticletable WHERE id = ?";
         String result = null; // Initialize the result variable to return

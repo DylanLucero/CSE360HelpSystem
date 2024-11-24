@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.ComboBox;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 
 import java.sql.SQLException;
 
@@ -72,7 +73,10 @@ public class Main extends Application {
 				window.setScene(establishAdminWindow());
 				window.show();
 			}
-		
+			else {
+				window.setScene(establishLogin());
+				window.show();
+			}
 		loginPage.setTitle("CSE360 Help System");
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
@@ -131,13 +135,8 @@ public class Main extends Application {
 			        		window.setScene(instructorWindow());	
 			        	}
 		        }
-		        else if (databaseHelper.doesUserExist(userText.getText())) {
-		            // No role assigned, go to roleWindow
-		            System.out.println("Login Success - No Role Assigned");
-		            window.setScene(roleSelect()); // Redirect to role selection window
-		        }
 		        else {
-		        	//System.out.println("Login Error");
+		        	System.out.println("Login Error");
 	        		window.setScene(studentWindow());	
 
 			        return;
@@ -164,6 +163,17 @@ public class Main extends Application {
 			userText.clear();
 			passText.clear();
 			window.setScene(establishWindow());
+			try {
+				if(databaseHelper.isDatabaseEmpty() == true) {
+				window.setScene(establishAdminWindow());
+				}
+				else {
+					window.setScene(establishWindow());
+				}
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		});
 		
 		// Fix for AutoFocus
@@ -375,6 +385,15 @@ public class Main extends Application {
 
 		TextField otp = new TextField();
 
+		ObservableList<String> options = FXCollections.observableArrayList(
+	            "Student",
+	            "Instructor"
+	        );
+		final ComboBox<String> role = new ComboBox<>(FXCollections.observableArrayList());
+        final ComboBox<String> select = new ComboBox<>(options);
+        select.setPromptText("Select Role");
+        role.setPromptText("Role");
+
 		Button restore = new Button("Restore");
 		Button backup = new Button("Backup");
 		Button backupHelp = new Button("Backup Help Article");
@@ -409,7 +428,13 @@ public class Main extends Application {
 		
 		// Invite User - Generating an OTP to verify in database
 		inviteUser.setOnAction(e->{
-			otp.setText(OTP.generateOTP());
+			String selectedRole = select.getValue(); // Get the current value of the ComboBox
+		    if (selectedRole == null || selectedRole.isEmpty()) {
+		        otp.setText("Please select a role before generating an OTP.");
+		    } else {
+		        otp.setText(databaseHelper.generateOTP(selectedRole));
+		    }
+			
 		});
 		
 		
@@ -477,6 +502,7 @@ public class Main extends Application {
 		// Adding to Grid
 		gPane.add(label, 1,0,2,1);
 		gPane.add(inviteUser,1,2,1,1);
+		gPane.add(select,2,2,2,1);
 		gPane.add(otp,3,2,2,1);
 		gPane.add(viewArticle, 3,3,1,1);
 		gPane.add(updateArticle, 3,4,1,1);
@@ -521,6 +547,8 @@ public class Main extends Application {
 		pass.setPromptText("Password");
 		PasswordField verifyPass = new PasswordField();
 		verifyPass.setPromptText("Re-enter Password");
+		TextField otpEnter = new TextField();
+		otpEnter.setPromptText("Enter your OTP");
 		
 		
 		create.setOnAction(e->{
@@ -531,6 +559,7 @@ public class Main extends Application {
 				user.clear();
 				pass.clear();
 				verifyPass.clear();
+				otpEnter.clear();
 				return;
 			}
 			
@@ -541,24 +570,49 @@ public class Main extends Application {
 			    user.clear();
 			    pass.clear();
 			    verifyPass.clear();
+			    otpEnter.clear();
 			    return;
 			}
 			else {
 				 String username = user.getText();      // Get the username when button is clicked
-			     String password = pass.getText();      // Get the password when button is clicked
-			        try {
-			    		if(databaseHelper.isDatabaseEmpty()) {
-			    			databaseHelper.register(username, password, "Admin");
+				 String otp = otpEnter.getText();
+				 String password = pass.getText();      // Get the password when button is clicked
+				 try {
+						if (databaseHelper.verifyOTP(otp) == false){
+							a.setAlertType(AlertType.WARNING);
+						    a.setContentText("Incorrect OTP!");
+						    a.show();
+						    user.clear();
+						    pass.clear();
+						    verifyPass.clear();
+						    otpEnter.clear();
+							return;
+						 }
+						else if (!pass.getText().equals(verifyPass.getText())) {
+							a.setAlertType(AlertType.WARNING);
+							a.setContentText("Passwords do Not match");
+							a.show();
+							user.clear();
+							pass.clear();
+							verifyPass.clear();
+							 otpEnter.clear();
+							return;
 						}
-						else {
-							databaseHelper.register(username, password, "Student");
+							else {
+								String role = databaseHelper.getLastVerifiedRole();
+							try {
+								databaseHelper.register(username, password, role);
+							} catch (SQLException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+
+							}
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
-					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				
-			}
+				 }
 			window.setScene(loginSc);
 		});
 		
@@ -573,6 +627,7 @@ public class Main extends Application {
 		gPane.add(user, 2,1,1,1);
 		gPane.add(pass, 2,2,1,1);
 		gPane.add(verifyPass, 2,3,1,1);
+		gPane.add(otpEnter, 2,4,1,1);
 		gPane.add(create,2,5,1,1);
 		gPane.add(backButton,3,5,1,1);
 		gPane.setVgap(10);
