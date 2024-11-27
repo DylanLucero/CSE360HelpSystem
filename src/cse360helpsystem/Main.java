@@ -426,13 +426,7 @@ public class Main extends Application {
 		
 		// List Users - List user accounts from Database
 		listUsers.setOnAction(e->{
-			try {
-				System.out.println("");
-				databaseHelper.printUsers();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			
+			window.setScene(listUsersWindow());
 		});
 		
 		createArticle.setOnAction(e->{
@@ -1223,6 +1217,76 @@ public class Main extends Application {
 		return helpSc;
 	}
 	
+	public Scene listUsersWindow() {
+		Label result = new Label("");
+				
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "Admin",
+			        "Instructor",
+			        "Viewing Special Decrypted Bodies"
+			    );
+		final ComboBox<String> level = new ComboBox<String>(options);
+		level.setPromptText("Privilige Groups");
+		
+		ObservableList<String> role = 
+			    FXCollections.observableArrayList(
+			        "Admin",
+			        "Instructor",
+			        "Student"
+			    );
+		final ComboBox<String> roles = new ComboBox<String>(role);
+		roles.setPromptText("Role");
+		
+		Button searchButton = new Button("Search");
+		Button cancel = new Button("Cancel");
+		
+		
+		searchButton.setOnAction(e->{
+			String selectedLevel = level.getValue();
+			String selectedRole = roles.getValue();
+		    if (selectedLevel == null || selectedRole == null) {
+		        result.setText("Please select both privilege group and role.");
+		    }
+		    else {
+			String levelChoice = switch (selectedLevel) {
+				case "Admin" -> "admin";
+				case "Instructor" -> "instructor";
+				case "Viewing Special Decrypted Bodies" -> "view";
+				default -> null;	
+				};
+			String roleChoice = switch (selectedRole) {
+				case "Admin" -> "admin";
+				case "Instructor" -> "instructor";
+				case "Student" -> "student";
+				default -> null;	
+				};
+				try {
+					databaseHelper.listUsers(levelChoice, roleChoice);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+			}
+		    }
+			
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		
+		gPane.add(result, 0, 1);
+		gPane.add(searchButton, 2, 1);
+		gPane.add(level, 1, 0);
+		gPane.add(roles, 0, 0);
+		gPane.add(cancel, 1,1);
+		
+		searchSc = new Scene(gPane, 640,480);
+		return searchSc;
+	}
 	public Scene searchWindow() {
 		TextField search = new TextField("");
 		search.setPromptText("Search");

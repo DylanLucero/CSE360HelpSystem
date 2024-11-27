@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.Base64;
 
-import org.bouncycastle.util.Arrays;
+//import org.bouncycastle.util.Arrays;
 import Encryption.EncryptionHelper;
 import Encryption.EncryptionUtils;
 
@@ -108,6 +108,7 @@ private EncryptionHelper encryptionHelper;
                 + "first_name VARCHAR(50), "
                 + "last_name VARCHAR(50), "
                 + "preferred_name VARCHAR(50),"
+                + "accessLevel VARCHAR(50),"
                 + "is_setup_complete BOOLEAN DEFAULT NULL);";
 
         try (Statement stmt = connection.createStatement()) {
@@ -392,6 +393,22 @@ private EncryptionHelper encryptionHelper;
 			}
 		}
 	}
+	public void listUsers(String accessLevel, String role) throws SQLException {
+		String query = "SELECT * FROM cse360users WHERE role = ? AND accessLevel = ?";
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, role);
+			pstmt.setString(2, accessLevel);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					System.out.println("UserName: " + rs.getString("username"));
+			        System.out.println("Role: " + rs.getString("role"));
+			        System.out.println("First Name: " + rs.getString("first_name"));
+			        System.out.println("Last Name: " + rs.getString("last_name"));
+			        System.out.println("Preferred Name: " + rs.getString("preferred_name"));
+			        }
+			       }
+				}
+		}
 	
 	public boolean doesUserExist(String username) {
 	    String query = "SELECT COUNT(*) FROM cse360users WHERE username = ?";
@@ -549,6 +566,8 @@ private EncryptionHelper encryptionHelper;
 				}
 			}
 		}
+
+	
 	
 	public void deleteHelpArticle(String id) throws Exception {
 	    String sql = "UPDATE helparticletable SET article_type = NULL, article_level = NULL, article_body = NULL WHERE id = ?"; // SQL update statement
