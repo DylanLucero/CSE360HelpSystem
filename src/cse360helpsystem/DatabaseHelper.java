@@ -69,7 +69,7 @@ private EncryptionHelper encryptionHelper;
         System.out.println("Connecting to Help Article Database");
 	}
 	
-	private static void listTableContents(String tableName) throws SQLException {
+	public void listTableContents(String tableName) throws SQLException {
         String sql = "SELECT * FROM " + tableName;
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -230,6 +230,18 @@ private EncryptionHelper encryptionHelper;
         }
 
         return result;
+    }
+    
+    public void getListofEncrypted() throws SQLException{
+    	String getContents = "SELECT * from helparticletable WHERE article_level = 'restricted'";
+    	try (PreparedStatement stmt = connection.prepareStatement(getContents);
+            ResultSet rs = stmt.executeQuery()) {
+			while (rs.next()) {
+				System.out.println("Article ID: " + rs.getString("id"));
+		        System.out.println("Article Title: " + rs.getString("article_title"));
+
+		        }
+			}
     }
 
     public String getTableBody(int id) {
