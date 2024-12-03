@@ -113,7 +113,7 @@ private EncryptionHelper encryptionHelper;
                 + "last_name VARCHAR(50), "
                 + "preferred_name VARCHAR(50),"
                 + "accessLevel VARCHAR(50),"
-                + "is_setup_complete BOOLEAN DEFAULT NULL);";
+                + "is_setup_complete BOOLEAN DEFAULT FALSE);";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createTableSQL);
@@ -170,7 +170,7 @@ private EncryptionHelper encryptionHelper;
 	    return lastVerifiedRole;
 	}
 	public boolean verifyOTP(String enteredOTP) throws SQLException {
-	    String query = "SELECT otp, role FROM otpRecords ORDER BY created_at DESC LIMIT 1";
+	    String query = "SELECT otp, role FROM otpRecords";
 	    try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 	        try (ResultSet rs = pstmt.executeQuery()) {
 	            if (rs.next()) {
@@ -551,7 +551,7 @@ private EncryptionHelper encryptionHelper;
 	        pstmt.setString(1, username);
 	        ResultSet rs1;
 	        rs1 = pstmt.executeQuery();
-	        rs1.next();
+	        //rs1.next();
 	        if (rs1.next()) {
 	        	updateResult = rs1.getBoolean("is_setup_complete");
 	        }
