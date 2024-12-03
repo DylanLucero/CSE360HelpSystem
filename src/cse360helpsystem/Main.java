@@ -282,6 +282,7 @@ public class Main extends Application {
 		Button backup = new Button("Backup");
 		Button removeAll = new Button("Remove All");
 		Button mergeAll = new Button("Merge All");
+		Button searchHelpArticles = new Button("Search Help Articles");
 		
 		Text text = new Text("Would you like to remove all existing article or merge the back ups with current articles?");
 		Text articleText = new Text("This is an article");
@@ -311,7 +312,9 @@ public class Main extends Application {
 		createArticle.setOnAction(e->{
 			window.setScene(createArticleWindow());
 		});
-		
+		searchHelpArticles.setOnAction(e->{
+			window.setScene(searchHelpWindow());
+		});
 		// For Viewing the article, creates a pop up
 		viewArticle.setOnAction(e->{
 			try {
@@ -411,6 +414,7 @@ public class Main extends Application {
 		Button removeArticle = new Button("Remove Article");
 		Button removeHelpArticle = new Button("Remove Help Article");
 		
+		Button searchHelpArticles = new Button("List Help Articles");
 		
 		
 		// Admin no longer as the right to edit articles
@@ -451,19 +455,15 @@ public class Main extends Application {
 		
 		// List Users - List user accounts from Database
 		listUsers.setOnAction(e->{
-			try {
-				System.out.println("");
-				databaseHelper.printUsers();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			
+			window.setScene(listUsersWindow());
 		});
 		
 		createArticle.setOnAction(e->{
 			window.setScene(createArticleWindow());
 		});
-		
+		searchHelpArticles.setOnAction(e->{
+			window.setScene(searchHelpWindow());
+		});
 		//Removing an Article
 		removeArticle.setOnAction(e->{
 			// Enter Article ID
@@ -519,6 +519,7 @@ public class Main extends Application {
 		gPane.add(logout,1,9,2,1);
 		
 		// Help Srticle Buttons
+		gPane.add(searchHelpArticles, 0, 2);
 		gPane.add(removeHelpArticle, 0, 3);
 		gPane.add(backupHelp, 0, 4);
 		gPane.add(restoreHelp, 0, 5);
@@ -1278,6 +1279,124 @@ public class Main extends Application {
 		return helpSc;
 	}
 	
+	public Scene listUsersWindow() {
+		Label result = new Label("");
+				
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "Admin",
+			        "Instructor",
+			        "Viewing Special Decrypted Bodies"
+			    );
+		final ComboBox<String> level = new ComboBox<String>(options);
+		level.setPromptText("Privilige Groups");
+		
+		ObservableList<String> role = 
+			    FXCollections.observableArrayList(
+			        "Admin",
+			        "Instructor",
+			        "Student"
+			    );
+		final ComboBox<String> roles = new ComboBox<String>(role);
+		roles.setPromptText("Role");
+		
+		Button searchButton = new Button("Search");
+		Button cancel = new Button("Cancel");
+		
+		
+		searchButton.setOnAction(e->{
+			String selectedLevel = level.getValue();
+			String selectedRole = roles.getValue();
+		    if (selectedLevel == null || selectedRole == null) {
+		        result.setText("Please select both privilege group and role.");
+		    }
+		    else {
+			String levelChoice = switch (selectedLevel) {
+				case "Admin" -> "admin";
+				case "Instructor" -> "instructor";
+				case "Viewing Special Decrypted Bodies" -> "view";
+				default -> null;	
+				};
+			String roleChoice = switch (selectedRole) {
+				case "Admin" -> "admin";
+				case "Instructor" -> "instructor";
+				case "Student" -> "student";
+				default -> null;	
+				};
+				try {
+					databaseHelper.listUsers(levelChoice, roleChoice);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+			}
+		    }
+			
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(adminWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+		
+		gPane.add(result, 0, 1);
+		gPane.add(searchButton, 2, 1);
+		gPane.add(level, 1, 0);
+		gPane.add(roles, 0, 0);
+		gPane.add(cancel, 1,1);
+		
+		searchSc = new Scene(gPane, 640,480);
+		return searchSc;
+	}
+	public Scene searchHelpWindow() {
+		Label result = new Label("");
+				
+		ObservableList<String> options = 
+			    FXCollections.observableArrayList(
+			        "All",
+			        "Restricted"
+			    );
+			final ComboBox<String> level = new ComboBox<String>(options);
+			level.setPromptText("Group");
+		
+		Button searchButton = new Button("Search");
+		Button cancel = new Button("Cancel");
+		
+		searchButton.setOnAction(e->{
+			if (level.getValue() == "Restricted"){
+				try {
+					databaseHelper.getListofEncrypted();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+				else {
+				try {
+					databaseHelper.listTableContents("helparticletable");
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				}
+		});
+		
+		cancel.setOnAction(e->{
+			window.setScene(studentWindow());
+		});
+		
+		GridPane gPane = new GridPane();
+		gPane.setAlignment(Pos.CENTER);
+
+		gPane.add(result, 0, 1);
+		gPane.add(searchButton, 2, 1);
+		gPane.add(level, 1, 0);
+		gPane.add(cancel, 1,1);
+		
+		searchSc = new Scene(gPane, 640,480);
+		return searchSc;
+	}
 	public Scene searchWindow() {
 		TextField search = new TextField("");
 		search.setPromptText("Search");
